@@ -6,16 +6,16 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import model.ClientHandler;
+
 public class ServerController extends Thread {
 
     private ServerSocket serverSocket;
-    private PropertyChangeSupport pcs;
+    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);;
 
     public ServerController(int port) {
 
         System.out.println("Starting server!");
-
-        pcs = new PropertyChangeSupport(this);
 
         try {
             serverSocket = new ServerSocket(port);
@@ -34,7 +34,9 @@ public class ServerController extends Thread {
             try {
 
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("A client has connected!");
+
+                addPropertyChangeListener(new ClientHandler(clientSocket, pcs));
+                System.out.println("A user has joined. Referring them to a handler.");
 
             } catch (IOException e) {
 
