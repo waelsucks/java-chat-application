@@ -3,11 +3,13 @@ import javax.swing.*;
 import java.awt.*;
 
 public class MainPanel extends JPanel {
-    private JLabel userLabel, trafficLabel;
-    private JButton quit, send, pic, connect, addContact;
+    private JLabel userLabel, trafficLabel, specificTrafficLabel;
+    private JButton quit, send, pic, connect, addContact, show, reset;
     private JPanel mainPanel, leftPnl, centerPnl, btnPnl, rightPnl;
     private JTextArea chatBox, messageBox, userBox, trafficBox;
     private JScrollPane chatPane, messagePane, userPane, trafficPane;
+    private JTextField trafficStart, trafficStop;
+
     public static void main(String[] args) {
         new MainPanel();    
     }
@@ -133,24 +135,58 @@ public class MainPanel extends JPanel {
         trafficPane = new JScrollPane(trafficBox);
         trafficPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         trafficPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        trafficPane.setPreferredSize(new Dimension(160, 430));
+        trafficPane.setPreferredSize(new Dimension(160, 230));
 
         connect = new JButton("Connect");
-        connect.setPreferredSize(new Dimension(150, 30));
+        connect.setPreferredSize(new Dimension(160, 30));
         connect.setBackground(new Color(0, 0, 0));
 		connect.setForeground(new Color(50, 205, 50));
 		connect.setFont(new Font("Monospaced", Font.BOLD, 13));
 
         quit = new JButton("Disconnect");
-        quit.setPreferredSize(new Dimension(150, 30));
+        quit.setPreferredSize(new Dimension(160, 30));
         quit.setBackground(new Color(0, 0, 0));
 		quit.setForeground(new Color(50, 205, 50));
 		quit.setFont(new Font("Monospaced", Font.BOLD, 13));
+
+        String msg= String.format("\n %s", "Specific traffic");
+        specificTrafficLabel = new JLabel(msg);
+        specificTrafficLabel.setFont(new Font("Monospaced", Font.BOLD, 13));
+        specificTrafficLabel.setForeground(new Color(50, 205, 50));
+
+        trafficStart = new JTextField("22.02.22 22:22:00");
+        trafficStart.setPreferredSize(new Dimension (160, 30));
+        trafficStart.setBackground(new Color(0, 0, 0));
+		trafficStart.setForeground(new Color(50, 205, 50));
+		trafficStart.setFont(new Font("Monospaced", Font.BOLD, 13));
+
+        trafficStop = new JTextField("22.02.22 23:23:00");
+        trafficStop.setPreferredSize(new Dimension (160, 30));
+        trafficStop.setBackground(new Color(0, 0, 0));
+		trafficStop.setForeground(new Color(50, 205, 50));
+		trafficStop.setFont(new Font("Monospaced", Font.BOLD, 13));
+
+        show = new JButton("Show");
+        show.setPreferredSize(new Dimension(160, 30));
+        show.setBackground(new Color(0, 0, 0));
+		show.setForeground(new Color(50, 205, 50));
+		show.setFont(new Font("Monospaced", Font.BOLD, 13));
+
+        reset = new JButton("Reset");
+        reset.setPreferredSize(new Dimension(160, 30));
+        reset.setBackground(new Color(0, 0, 0));
+		reset.setForeground(new Color(50, 205, 50));
+		reset.setFont(new Font("Monospaced", Font.BOLD, 13));
 
         rightPnl.add(trafficLabel);
         rightPnl.add(trafficPane);
         rightPnl.add(connect);
         rightPnl.add(quit);
+        rightPnl.add(specificTrafficLabel);
+        rightPnl.add(trafficStart);
+        rightPnl.add(trafficStop);
+        rightPnl.add(show);
+        rightPnl.add(reset);
 
 
         ////////////////////////////////////////////////
