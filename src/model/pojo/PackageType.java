@@ -4,6 +4,7 @@ public enum PackageType {
 
     MESSAGE,
     CONNECT,
-    DISCONNECT
+    DISCONNECT,
+    USER, NEW_USER
 
 }

@@ -22,7 +22,7 @@ public class MainPanel extends JPanel {
     // }
     
     public void createActionEvents() {
-    	getSend().addActionListener(l -> {controller.sendMessage(getMessageBox());});
+    	getSend().addActionListener(l -> {controller.sendMessage(getMessageBox().getText());});
         getConnect().addActionListener(l -> {controller.connect();});
         getDisconnect().addActionListener(e -> {controller.disconnect();});
     }
@@ -37,10 +37,6 @@ public class MainPanel extends JPanel {
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         createActionEvents();
-    }
-    
-    public void clearFields() {
-        setMessageBox(null);
     }
 
 	public void createComponents() {
@@ -88,7 +84,7 @@ public class MainPanel extends JPanel {
         centerPnl.setBackground(new Color(0, 0, 0));
         centerPnl.setPreferredSize(new Dimension(550, 630));
 
-        chatBox = new JTextArea("Testing.... Testing.... Testing.... Testing.... Testing.... Testing.... Testing.... ");
+        chatBox = new JTextArea();
         chatBox.setEditable(false);
 		chatBox.setLineWrap(true);
 		chatBox.setWrapStyleWord(true);
@@ -155,14 +151,20 @@ public class MainPanel extends JPanel {
     public void setChatBox(String chatBox) {
         this.chatBox.setText(chatBox);
     }
-    public String getChatBox() {
-        return chatBox.getText();
+    public JTextArea getChatBox() {
+        return chatBox;
     }
-    public void setMessageBox(String messageBox) {
-        this.messageBox.setText(messageBox);
+    public void setMessageBoxValue(String text) {
+        this.messageBox.setText(text);
     }
-    public String getMessageBox() {
-        return messageBox.getText();
+    public JTextArea getMessageBox() {
+        return messageBox;
+    }
+    public JTextArea getUserBox() {
+        return userBox;
+    }
+    public void setUserBoxValue(String text) {
+        this.userBox.setText(text);
     }
     
     ///////////// GS for buttons/////////////

@@ -3,7 +3,10 @@ package controller;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 //import java.sql.Date;
@@ -15,6 +18,8 @@ import model.ClientHandler;
 import model.pojo.Message;
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
+import model.pojo.User;
+import model.pojo.UserGroup;
 import view.ServerGUI;
 
 public class ServerController extends Thread implements PropertyChangeListener{
@@ -28,6 +33,21 @@ public class ServerController extends Thread implements PropertyChangeListener{
     public ServerController(int port) {
 
         System.out.println("Starting server!");
+
+        // // TESTING
+
+        // try (ObjectOutputStream oos = new ObjectOutputStream(
+        //         new BufferedOutputStream(new FileOutputStream("files/Users.dat")))) {
+
+        //     User user = new User("NEW GUY", UserGroup.USER, "A NEW BEGINNING", null);
+        //     oos.writeObject(user);
+        //     oos.flush();
+        //     oos.close();
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
+
+        // // -----------
 
         pcs.addPropertyChangeListener(this);
         this.serverGUI = new ServerGUI(this);  
@@ -77,14 +97,25 @@ public class ServerController extends Thread implements PropertyChangeListener{
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        
+
         switch (evt.getPropertyName()) {
-            
+
             case "package":
 
                 TrafficPackage tp = (TrafficPackage) evt.getNewValue();
+
+                switch (tp.getType()) {
+
+                    case MESSAGE:
+                        pcs.firePropertyChange("public message", null, tp);
+                        break;
+                
+                    default:
+                        break;
+                }
+
                 events.add(tp);
-                serverGUI.getTrafficBox().append(String.format("[%s] >> %s \n", tp.getDate(), tp.getEvent().getMessage()));
+                serverGUI.getTrafficBox().append(String.format("[%s] >> %s \n", tp.getDate(), tp.getType()));
                 
                 break;
         

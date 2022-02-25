@@ -7,9 +7,12 @@ import java.net.Socket;
 import java.util.Date;
 import java.util.Scanner;
 
+import javax.swing.JOptionPane;
+
 import model.pojo.Message;
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
+import model.pojo.User;
 import view.MainPanel;
 
 public class ClientController {
@@ -22,17 +25,26 @@ public class ClientController {
     private MainPanel view;
     private boolean clientConnected;
     private Listener listen;
+    private User user;
 
     public ClientController(String serverString, int portInt) {
 
         this.serverAddress = serverString;
         this.serverPort = portInt;
 
-        listen = new Listener();
-        listen.start();
+        connect();
+
+        // Logging in
+
+        String username = JOptionPane.showInputDialog("Enter username");
+
+        try {
+            out.writeObject(username);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         this.view = new MainPanel(this);
-        connect();
 
     }
 
@@ -49,19 +61,21 @@ public class ClientController {
                     socket.getInputStream());
 
             clientConnected = true;
-
+            listen = new Listener();
+            listen.start();
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
-        } 
+        }
 
     }
 
     public void sendMessage(String message) {
 
         try {
+            view.getMessageBox().setText(null);
             out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(message)));
             out.flush();
         } catch (IOException e) {
@@ -73,7 +87,8 @@ public class ClientController {
     public void disconnect() {
         try {
             clientConnected = false;
-            out.writeObject(new TrafficPackage(PackageType.DISCONNECT, new Date(), new Message("Disconnecting " + socket.getInetAddress())));
+            out.writeObject(new TrafficPackage(PackageType.DISCONNECT, new Date(),
+                    new Message("Disconnecting " + socket.getInetAddress())));
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -84,18 +99,33 @@ public class ClientController {
 
         @Override
         public void run() {
-            
-            while (clientConnected) {
-                
-                try {
 
-                    System.out.println(input.readObject());
+            while (!interrupted()) {
+                while (clientConnected) {
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    
+                    try {
+
+                        TrafficPackage tp = (TrafficPackage) input.readObject();
+
+                        if (tp.getType() == PackageType.NEW_USER) {
+                            String name = JOptionPane.showInputDialog("Welcome! Enter your name: ");
+                            out.writeObject(name);
+                        }
+
+                        if (tp.getType() == PackageType.USER) {
+                            user = (User) tp.getEvent();
+                            System.out.println("My name is " + user.getName());
+                        }
+
+                        String toWrite = String.format("[%s] >> %s \n", tp.getDate(), tp.getEvent().getMessage());
+                        view.getChatBox().append(toWrite);
+
+                    } catch (Exception e) {
+                        // System.out.println("Disconnecting");
+                        // disconnect();
+                    }
+
                 }
-
             }
 
         }

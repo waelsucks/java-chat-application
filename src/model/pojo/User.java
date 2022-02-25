@@ -12,7 +12,7 @@ import javax.swing.ImageIcon;
  * then enter a username and recieve the correct user object.
  */
 
-public class User implements Serializable {
+public class User implements Serializable, PackageInterface {
 
     private String userID;
     private String name;
@@ -53,6 +53,11 @@ public class User implements Serializable {
 
     public ImageIcon getImage(){
         return this.icon;
+    }
+
+    @Override
+    public String getMessage() {
+        return "I am a user";
     }
 
 }
