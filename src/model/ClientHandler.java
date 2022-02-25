@@ -45,8 +45,10 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
             String username = (String) in.readObject();
 
             User user = checkUser(username);
-            out.writeObject(new TrafficPackage(PackageType.USER, new Date(), user));
+            out.writeObject(new TrafficPackage(PackageType.USER, new Date(), user,user));
             out.flush();
+
+            serverPcs.firePropertyChange("package", null, new TrafficPackage(PackageType.CONNECT, new Date(), user, user));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,7 +102,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
         String name = null;
         
         try {
-            out.writeObject(new TrafficPackage(PackageType.NEW_USER, new Date(), null));
+            out.writeObject(new TrafficPackage(PackageType.NEW_USER, new Date(), null, user));
             out.flush();
             name = (String) in.readObject();
         } catch (Exception e1) {

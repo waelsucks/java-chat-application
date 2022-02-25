@@ -76,7 +76,7 @@ public class ClientController {
 
         try {
             view.getMessageBox().setText(null);
-            out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(message)));
+            out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(message), user));
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -88,7 +88,7 @@ public class ClientController {
         try {
             clientConnected = false;
             out.writeObject(new TrafficPackage(PackageType.DISCONNECT, new Date(),
-                    new Message("Disconnecting " + socket.getInetAddress())));
+                    new Message("Disconnecting " + socket.getInetAddress()), user));
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -117,8 +117,10 @@ public class ClientController {
                             System.out.println("My name is " + user.getName());
                         }
 
-                        String toWrite = String.format("[%s] >> %s \n", tp.getDate(), tp.getEvent().getMessage());
-                        view.getChatBox().append(toWrite);
+                        if (tp.getType() == PackageType.MESSAGE) {
+                            String toWrite = String.format("[%s] >> %s \n", tp.getUser().getName(), tp.getEvent().getMessage());
+                            view.getChatBox().append(toWrite);
+                        }
 
                     } catch (Exception e) {
                         // System.out.println("Disconnecting");

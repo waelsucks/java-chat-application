@@ -34,21 +34,6 @@ public class ServerController extends Thread implements PropertyChangeListener{
 
         System.out.println("Starting server!");
 
-        // // TESTING
-
-        // try (ObjectOutputStream oos = new ObjectOutputStream(
-        //         new BufferedOutputStream(new FileOutputStream("files/Users.dat")))) {
-
-        //     User user = new User("NEW GUY", UserGroup.USER, "A NEW BEGINNING", null);
-        //     oos.writeObject(user);
-        //     oos.flush();
-        //     oos.close();
-        // } catch (Exception e) {
-        //     e.printStackTrace();
-        // }
-
-        // // -----------
-
         pcs.addPropertyChangeListener(this);
         this.serverGUI = new ServerGUI(this);  
         this.events = new ArrayList<TrafficPackage>();
@@ -70,11 +55,6 @@ public class ServerController extends Thread implements PropertyChangeListener{
             try {
 
                 Socket clientSocket = serverSocket.accept();
-
-                TrafficPackage tp = new TrafficPackage(PackageType.CONNECT, new Date(), new Message("A new client has connected from " + clientSocket.getInetAddress()));
-                
-                events.add(tp);
-                serverGUI.getTrafficBox().append(String.format("[%s] >> %s \n", tp.getDate(), tp.getEvent().getMessage()));
 
                 System.out.println("A user has joined. Referring them to a handler.");
                 addPropertyChangeListener(new ClientHandler(clientSocket, pcs));
@@ -108,6 +88,10 @@ public class ServerController extends Thread implements PropertyChangeListener{
 
                     case MESSAGE:
                         pcs.firePropertyChange("public message", null, tp);
+                        break;
+
+                    case CONNECT:
+                        pcs.firePropertyChange("public message", null, new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(tp.getUser().getName() + " has logged in!"), tp.getUser()));
                         break;
                 
                     default:
