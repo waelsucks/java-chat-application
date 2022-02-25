@@ -56,8 +56,13 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
                     case DISCONNECT:
 
                         clientSocket.close();
+                        serverPcs.firePropertyChange("package", null, message);
                         interrupt();
                         break;
+
+                    case MESSAGE:
+
+                        serverPcs.firePropertyChange("package", null, message);
                 
                     default:
                         break;
@@ -84,9 +89,11 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
     }
 
-    // private User createUser(){
-        
-    //     userID.add(new User(User.getName().getGroup(). ));
+    // private static User createUser(){
+
+    //     user = new User(name, group, userID, icon)
+
+    //     userID.add(user);
     // }
 
     private String generateUserID() {

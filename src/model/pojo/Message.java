@@ -1,6 +1,8 @@
 package model.pojo;
 
-public class Message implements PackageInterface {
+import java.io.Serializable;
+
+public class Message implements PackageInterface, Serializable {
     
     private String message;
 

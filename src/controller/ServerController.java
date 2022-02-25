@@ -1,5 +1,6 @@
 package controller;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
@@ -16,7 +17,7 @@ import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import view.ServerGUI;
 
-public class ServerController extends Thread {
+public class ServerController extends Thread implements PropertyChangeListener{
 
     private ServerSocket serverSocket;
     private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
@@ -28,6 +29,7 @@ public class ServerController extends Thread {
 
         System.out.println("Starting server!");
 
+        pcs.addPropertyChangeListener(this);
         this.serverGUI = new ServerGUI(this);  
         this.events = new ArrayList<TrafficPackage>();
 
@@ -67,8 +69,29 @@ public class ServerController extends Thread {
 
     }
 
+    
+
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        
+        switch (evt.getPropertyName()) {
+            
+            case "package":
+
+                TrafficPackage tp = (TrafficPackage) evt.getNewValue();
+                events.add(tp);
+                serverGUI.getTrafficBox().append(String.format("[%s] >> %s \n", tp.getDate(), tp.getEvent().getMessage()));
+                
+                break;
+        
+            default:
+                break;
+        }
+        
     }
 
 }

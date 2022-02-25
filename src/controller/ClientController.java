@@ -20,11 +20,16 @@ public class ClientController {
     private String serverAddress;
     private int serverPort;
     private MainPanel view;
+    private boolean clientConnected;
+    private Listener listen;
 
     public ClientController(String serverString, int portInt) {
 
         this.serverAddress = serverString;
         this.serverPort = portInt;
+
+        listen = new Listener();
+        listen.start();
 
         this.view = new MainPanel(this);
         connect();
@@ -43,42 +48,32 @@ public class ClientController {
             input = new ObjectInputStream(
                     socket.getInputStream());
 
-            Listener listen = new Listener(input, out);
+            clientConnected = true;
 
-            while (true) {
-
-                // Main loop
-
-                
-
-            }
 
         } catch (Exception e) {
 
-            System.out.println("Server shut down.");
-            System.exit(0);
+            e.printStackTrace();
 
-        } finally {
+        } 
 
-            try {
+    }
 
-                socket.close();
-                out.close();
-                input.close();
+    public void sendMessage(String message) {
 
-            } catch (IOException e) {
-
-                e.printStackTrace();
-
-            }
-
+        try {
+            out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(message)));
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }
 
     public void disconnect() {
         try {
-            out.writeObject(new TrafficPackage(PackageType.DISCONNECT, new Date(), new Message("Disconnecting")));
+            clientConnected = false;
+            out.writeObject(new TrafficPackage(PackageType.DISCONNECT, new Date(), new Message("Disconnecting " + socket.getInetAddress())));
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -87,16 +82,10 @@ public class ClientController {
 
     public class Listener extends Thread {
 
-        public Listener(ObjectInputStream input, ObjectOutputStream out) {
-
-            start();
-
-        }
-
         @Override
         public void run() {
             
-            while (!interrupted()) {
+            while (clientConnected) {
                 
                 try {
 
@@ -104,7 +93,7 @@ public class ClientController {
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.exit(0);
+                    
                 }
 
             }

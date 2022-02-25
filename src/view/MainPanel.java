@@ -5,6 +5,8 @@ import controller.ClientController;
 import model.pojo.Message;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MainPanel extends JPanel {
 
@@ -18,6 +20,12 @@ public class MainPanel extends JPanel {
     // public static void main(String[] args) {
     //     new MainPanel();    
     // }
+    
+    public void createActionEvents() {
+    	getSend().addActionListener(l -> {controller.sendMessage(getMessageBox());});
+        getConnect().addActionListener(l -> {controller.connect();});
+        getDisconnect().addActionListener(e -> {controller.disconnect();});
+    }
 
     public MainPanel(ClientController clientController) { 
         createComponents();
@@ -28,6 +36,7 @@ public class MainPanel extends JPanel {
         frame.pack();
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        createActionEvents();
     }
     
     public void clearFields() {
@@ -98,12 +107,12 @@ public class MainPanel extends JPanel {
         messagePane = new JScrollPane(messageBox);
         messagePane.setPreferredSize(new Dimension(500, 50));
 
-send = new JButton("Send");
+        send = new JButton("Send");
         send.setPreferredSize(new Dimension(120, 30));
         send.setBackground(new Color(0, 0, 0));
 		send.setForeground(new Color(50, 205, 50));
 		send.setFont(new Font("Monospaced", Font.BOLD, 13));
-		
+
         connect = new JButton("Connect");
         connect.setPreferredSize(new Dimension(120, 30));
         connect.setBackground(new Color(0, 0, 0));
@@ -115,12 +124,6 @@ send = new JButton("Send");
         disconnect.setBackground(new Color(0, 0, 0));
         disconnect.setForeground(new Color(50, 205, 50));
         disconnect.setFont(new Font("Monospaced", Font.BOLD, 13));
-		
-        send = new JButton("Send");
-        send.setPreferredSize(new Dimension(120, 30));
-        send.setBackground(new Color(0, 0, 0));
-		send.setForeground(new Color(50, 205, 50));
-		send.setFont(new Font("Monospaced", Font.BOLD, 13));
 
         pic = new JButton("Upload Pic");
         pic.setPreferredSize(new Dimension(120, 30));
@@ -147,26 +150,6 @@ send = new JButton("Send");
         add(mainPanel);
         
     }
-
-    public void createActionEvents() {
-    	getSend().addActionListener(l -> sendMessage());
-        getConnect().addActionListener(l -> connect());
-        getDisconnect().addActionListener(l -> disconnect());
-
-	
-    }
-
-	private void connect() {
-		controller.connect();
-	}
-
-	private void disconnect() {
-		controller.disconnect();
-	}
-
-	private void sendMessage() {
-		
-	}
 
 	/////////////////////////////////////////
     public void setChatBox(String chatBox) {

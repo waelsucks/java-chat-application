@@ -1,8 +1,9 @@
 package model.pojo;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class TrafficPackage {
+public class TrafficPackage implements Serializable{
     
     private PackageType type;
     private Date date;

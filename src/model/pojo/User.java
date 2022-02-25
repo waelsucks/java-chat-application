@@ -47,4 +47,12 @@ public class User implements Serializable {
         this.group = group;
     }
 
+    public void setImage(ImageIcon icon){
+        this.icon = icon;
+    }
+
+    public ImageIcon getImage(){
+        return this.icon;
+    }
+
 }
