@@ -2,18 +2,18 @@ package view;
 import javax.swing.*;
 
 import controller.ClientController;
+import model.pojo.Message;
 
 import java.awt.*;
 
 public class MainPanel extends JPanel {
 
     private ClientController controller;
-    private JLabel userLabel, trafficLabel, specificTrafficLabel;
-    private JButton quit, send, pic, connect, addContact, show, reset;
-    private JPanel mainPanel, leftPnl, centerPnl, btnPnl, rightPnl;
-    private JTextArea chatBox, messageBox, userBox, trafficBox;
-    private JScrollPane chatPane, messagePane, userPane, trafficPane;
-    private JTextField trafficStart, trafficStop;
+    private JLabel userLabel;
+    private JButton quit, send, pic, addContact, connect, disconnect;
+    private JPanel mainPanel, leftPnl, centerPnl, btnPnl;
+    private JTextArea chatBox, messageBox, userBox;
+    private JScrollPane chatPane, messagePane, userPane;
 
     // public static void main(String[] args) {
     //     new MainPanel();    
@@ -22,7 +22,7 @@ public class MainPanel extends JPanel {
     public MainPanel(ClientController clientController) { 
         createComponents();
         this.controller = clientController;
-        JFrame frame = new JFrame("Chatty chatti chat away...");
+        JFrame frame = new JFrame("Bit by Bit");
         frame.add(this);
         frame.setVisible(true);
         frame.pack();
@@ -35,11 +35,11 @@ public class MainPanel extends JPanel {
     }
 
 	public void createComponents() {
-        setPreferredSize(new Dimension(930, 650));
+        setPreferredSize(new Dimension(750, 550));
         setLayout(new BorderLayout());
 
         mainPanel = new JPanel();
-        mainPanel.setPreferredSize(new Dimension(930, 650));
+        mainPanel.setPreferredSize(new Dimension(750, 550));
         mainPanel.setBackground(new Color(0, 0, 0));
 		mainPanel.setForeground(new Color(50, 205, 50));
 
@@ -52,7 +52,7 @@ public class MainPanel extends JPanel {
         userLabel.setFont(new Font("Monospaced", Font.BOLD, 13));
         userLabel.setForeground(new Color(50, 205, 50));
 
-        userBox = new JTextArea("Anna[Online] Malin[Online] Adam[Offline] Wael[Offline]");
+        userBox = new JTextArea();
         userBox.setEditable(false);
 		userBox.setLineWrap(true);
 		userBox.setWrapStyleWord(true);
@@ -98,14 +98,32 @@ public class MainPanel extends JPanel {
         messagePane = new JScrollPane(messageBox);
         messagePane.setPreferredSize(new Dimension(500, 50));
 
+send = new JButton("Send");
+        send.setPreferredSize(new Dimension(120, 30));
+        send.setBackground(new Color(0, 0, 0));
+		send.setForeground(new Color(50, 205, 50));
+		send.setFont(new Font("Monospaced", Font.BOLD, 13));
+		
+        connect = new JButton("Connect");
+        connect.setPreferredSize(new Dimension(120, 30));
+        connect.setBackground(new Color(0, 0, 0));
+		connect.setForeground(new Color(50, 205, 50));
+		connect.setFont(new Font("Monospaced", Font.BOLD, 13));
+		
+        disconnect = new JButton("Disconnect");
+        disconnect.setPreferredSize(new Dimension(120, 30));
+        disconnect.setBackground(new Color(0, 0, 0));
+        disconnect.setForeground(new Color(50, 205, 50));
+        disconnect.setFont(new Font("Monospaced", Font.BOLD, 13));
+		
         send = new JButton("Send");
-        send.setPreferredSize(new Dimension(150, 30));
+        send.setPreferredSize(new Dimension(120, 30));
         send.setBackground(new Color(0, 0, 0));
 		send.setForeground(new Color(50, 205, 50));
 		send.setFont(new Font("Monospaced", Font.BOLD, 13));
 
         pic = new JButton("Upload Pic");
-        pic.setPreferredSize(new Dimension(150, 30));
+        pic.setPreferredSize(new Dimension(120, 30));
         pic.setBackground(new Color(0, 0, 0));
 		pic.setForeground(new Color(50, 205, 50));
 		pic.setFont(new Font("Monospaced", Font.BOLD, 13));
@@ -115,93 +133,40 @@ public class MainPanel extends JPanel {
         btnPnl.setPreferredSize(new Dimension(500, 40));
 
         btnPnl.add(send);
+        btnPnl.add(connect);
+        btnPnl.add(disconnect);
         btnPnl.add(pic);
     
         centerPnl.add(chatPane);
         centerPnl.add(messagePane);
-        centerPnl.add(btnPnl);
-
-        ////////////////////////////////////////////////
-        rightPnl = new JPanel();
-        rightPnl.setBackground(new Color(0, 0, 0));
-        rightPnl.setPreferredSize(new Dimension(180, 630));
-        
-        trafficLabel = new JLabel("Traffic");
-        trafficLabel.setFont(new Font("Monospaced", Font.BOLD, 13));
-        trafficLabel.setForeground(new Color(50, 205, 50));
-
-        trafficBox = new JTextArea("220223.13:37.Anna[Logged in]");
-        trafficBox.setEditable(false);
-		//trafficBox.setLineWrap(true);
-		//trafficBox.setWrapStyleWord(true);
-        trafficBox.setBackground(new Color(0, 0, 0));
-		trafficBox.setForeground(new Color(50, 205, 50));
-		trafficBox.setFont(new Font("Monospaced", Font.BOLD, 13));
-
-        trafficPane = new JScrollPane(trafficBox);
-        trafficPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        trafficPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        trafficPane.setPreferredSize(new Dimension(160, 230));
-
-        connect = new JButton("Connect");
-        connect.setPreferredSize(new Dimension(160, 30));
-        connect.setBackground(new Color(0, 0, 0));
-		connect.setForeground(new Color(50, 205, 50));
-		connect.setFont(new Font("Monospaced", Font.BOLD, 13));
-
-        quit = new JButton("Disconnect");
-        quit.setPreferredSize(new Dimension(160, 30));
-        quit.setBackground(new Color(0, 0, 0));
-		quit.setForeground(new Color(50, 205, 50));
-		quit.setFont(new Font("Monospaced", Font.BOLD, 13));
-
-        String msg= String.format("\n %s", "Specific traffic");
-        specificTrafficLabel = new JLabel(msg);
-        specificTrafficLabel.setFont(new Font("Monospaced", Font.BOLD, 13));
-        specificTrafficLabel.setForeground(new Color(50, 205, 50));
-
-        trafficStart = new JTextField("22.02.22 22:22:00");
-        trafficStart.setPreferredSize(new Dimension (160, 30));
-        trafficStart.setBackground(new Color(0, 0, 0));
-		trafficStart.setForeground(new Color(50, 205, 50));
-		trafficStart.setFont(new Font("Monospaced", Font.BOLD, 13));
-
-        trafficStop = new JTextField("22.02.22 23:23:00");
-        trafficStop.setPreferredSize(new Dimension (160, 30));
-        trafficStop.setBackground(new Color(0, 0, 0));
-		trafficStop.setForeground(new Color(50, 205, 50));
-		trafficStop.setFont(new Font("Monospaced", Font.BOLD, 13));
-
-        show = new JButton("Show");
-        show.setPreferredSize(new Dimension(160, 30));
-        show.setBackground(new Color(0, 0, 0));
-		show.setForeground(new Color(50, 205, 50));
-		show.setFont(new Font("Monospaced", Font.BOLD, 13));
-
-        reset = new JButton("Reset");
-        reset.setPreferredSize(new Dimension(160, 30));
-        reset.setBackground(new Color(0, 0, 0));
-		reset.setForeground(new Color(50, 205, 50));
-		reset.setFont(new Font("Monospaced", Font.BOLD, 13));
-
-        rightPnl.add(trafficLabel);
-        rightPnl.add(trafficPane);
-        rightPnl.add(connect);
-        rightPnl.add(quit);
-        rightPnl.add(specificTrafficLabel);
-        rightPnl.add(trafficStart);
-        rightPnl.add(trafficStop);
-        rightPnl.add(show);
-        rightPnl.add(reset);
-
+        centerPnl.add(btnPnl);    
 
         ////////////////////////////////////////////////
         mainPanel.add(leftPnl);
         mainPanel.add(centerPnl);
-        mainPanel.add(rightPnl);
         add(mainPanel);
         
     }
+
+    public void createActionEvents() {
+    	getSend().addActionListener(l -> sendMessage());
+        getConnect().addActionListener(l -> connect());
+        getDisconnect().addActionListener(l -> disconnect());
+
+	
+    }
+
+	private void connect() {
+		controller.connect();
+	}
+
+	private void disconnect() {
+		controller.disconnect();
+	}
+
+	private void sendMessage() {
+		
+	}
 
 	/////////////////////////////////////////
     public void setChatBox(String chatBox) {
@@ -223,6 +188,12 @@ public class MainPanel extends JPanel {
     }
     public JButton getQuit() {
         return quit;
+    }
+    public JButton getConnect() {
+        return connect;
+    }
+    public JButton getDisconnect() {
+        return disconnect;
     }
 
 }

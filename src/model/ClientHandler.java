@@ -10,17 +10,23 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Random;
+
+import model.pojo.TrafficPackage;
+import model.pojo.User;
 
 public class ClientHandler extends Thread implements PropertyChangeListener {
 
     private PropertyChangeSupport serverPcs;
     private ObjectInputStream in;
     private ObjectOutputStream out;
-    private static ArrayList<String> usedID = new ArrayList<String>();
+    private static ArrayList<String> userID = new ArrayList<String>();
+    private Socket clientSocket;
 
     public ClientHandler(Socket clientSocket, PropertyChangeSupport pcs) {
-
+        
+        this.clientSocket = clientSocket;
         this.serverPcs = pcs;
 
         try {
@@ -43,7 +49,20 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
             try {
 
-                Object message = in.readObject();
+                TrafficPackage message = (TrafficPackage) in.readObject();
+
+                switch (message.getType()) {
+                    
+                    case DISCONNECT:
+
+                        clientSocket.close();
+                        interrupt();
+                        break;
+                
+                    default:
+                        break;
+                }
+                
                 serverPcs.firePropertyChange("message", null, message);
 
             } catch (Exception e) {
@@ -65,17 +84,24 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
     }
 
+    // private User createUser(){
+        
+    //     userID.add(new User(User.getName().getGroup(). ));
+    // }
+
     private String generateUserID() {
 
         Random rand = new Random();
         String randomID =  String.valueOf(rand.nextInt(9999));
 
-        while (usedID.contains(randomID)) {
+        while (userID.contains(randomID)) {
             randomID = String.valueOf(rand.nextInt(9999));
         }
 
         return randomID;
     
     }
+
+    
 
 }

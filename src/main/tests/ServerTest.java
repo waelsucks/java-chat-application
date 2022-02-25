@@ -1,6 +1,5 @@
 package main.tests;
 
-import controller.ServerController;
 import main.App;
 
 public class ServerTest {

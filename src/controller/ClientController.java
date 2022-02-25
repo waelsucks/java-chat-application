@@ -4,8 +4,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Date;
 import java.util.Scanner;
 
+import model.pojo.Message;
+import model.pojo.PackageType;
+import model.pojo.TrafficPackage;
 import view.MainPanel;
 
 public class ClientController {
@@ -21,9 +25,13 @@ public class ClientController {
 
         this.serverAddress = serverString;
         this.serverPort = portInt;
-        this.view = new MainPanel(this);
 
-        Scanner in = new Scanner(System.in);
+        this.view = new MainPanel(this);
+        connect();
+
+    }
+
+    public void connect() {
 
         try {
 
@@ -41,7 +49,7 @@ public class ClientController {
 
                 // Main loop
 
-                out.writeObject(in.nextLine());
+                
 
             }
 
@@ -57,7 +65,6 @@ public class ClientController {
                 socket.close();
                 out.close();
                 input.close();
-                in.close();
 
             } catch (IOException e) {
 
@@ -67,6 +74,15 @@ public class ClientController {
 
         }
 
+    }
+
+    public void disconnect() {
+        try {
+            out.writeObject(new TrafficPackage(PackageType.DISCONNECT, new Date(), new Message("Disconnecting")));
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public class Listener extends Thread {
@@ -87,7 +103,7 @@ public class ClientController {
                     System.out.println(input.readObject());
 
                 } catch (Exception e) {
-                    System.out.println("Server shut down.");
+                    e.printStackTrace();
                     System.exit(0);
                 }
 

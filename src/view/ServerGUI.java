@@ -1,22 +1,22 @@
 package view;
-
 import java.awt.*;
 import javax.swing.*;
 
+import controller.ServerController;
+
 public class ServerGUI extends JPanel{
     private JLabel trafficLabel, specificTrafficLabel;
-    private JButton quit, connect, show, reset;
+    private JButton show, reset;
     private JPanel mainPanel, rightPnl;
     private JTextArea trafficBox;
     private JScrollPane trafficPane;
     private JTextField trafficStart, trafficStop;
+    private ServerController controller;
         
-        public static void main(String[] args) {
-            ServerGUI sg = new ServerGUI();
-        }
-        public ServerGUI () {
+        public ServerGUI (ServerController controller) {
             createComponents();
-            JFrame frame = new JFrame("Chatty chatti chat away...");
+            this.controller = controller;
+            JFrame frame = new JFrame("Traffic Information");
             frame.add(this);
             frame.setVisible(true);
             frame.pack();
@@ -25,15 +25,23 @@ public class ServerGUI extends JPanel{
         }
 
         private void createComponents() {
+        	setPreferredSize(new Dimension(500, 370));
+            setLayout(new BorderLayout());
+
+            mainPanel = new JPanel();
+            mainPanel.setPreferredSize(new Dimension(500, 370));
+            mainPanel.setBackground(new Color(0, 0, 0));
+    		mainPanel.setForeground(new Color(50, 205, 50));
+    		
             rightPnl = new JPanel();
             rightPnl.setBackground(new Color(0, 0, 0));
-            rightPnl.setPreferredSize(new Dimension(180, 630));
+            rightPnl.setPreferredSize(new Dimension(480, 380));
             
             trafficLabel = new JLabel("Traffic");
             trafficLabel.setFont(new Font("Monospaced", Font.BOLD, 13));
             trafficLabel.setForeground(new Color(50, 205, 50));
 
-            trafficBox = new JTextArea("220223.13:37.Anna[Logged in]");
+            trafficBox = new JTextArea();
             trafficBox.setEditable(false);
             //trafficBox.setLineWrap(true);
             //trafficBox.setWrapStyleWord(true);
@@ -44,22 +52,9 @@ public class ServerGUI extends JPanel{
             trafficPane = new JScrollPane(trafficBox);
             trafficPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
             trafficPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-            trafficPane.setPreferredSize(new Dimension(160, 230));
+            trafficPane.setPreferredSize(new Dimension(480, 240));
 
-            connect = new JButton("Connect");
-            connect.setPreferredSize(new Dimension(160, 30));
-            connect.setBackground(new Color(0, 0, 0));
-            connect.setForeground(new Color(50, 205, 50));
-            connect.setFont(new Font("Monospaced", Font.BOLD, 13));
-
-            quit = new JButton("Disconnect");
-            quit.setPreferredSize(new Dimension(160, 30));
-            quit.setBackground(new Color(0, 0, 0));
-            quit.setForeground(new Color(50, 205, 50));
-            quit.setFont(new Font("Monospaced", Font.BOLD, 13));
-
-            String msg= String.format("\n %s", "Specific traffic");
-            specificTrafficLabel = new JLabel(msg);
+            specificTrafficLabel = new JLabel("Specific traffic: ");
             specificTrafficLabel.setFont(new Font("Monospaced", Font.BOLD, 13));
             specificTrafficLabel.setForeground(new Color(50, 205, 50));
 
@@ -89,16 +84,20 @@ public class ServerGUI extends JPanel{
 
             rightPnl.add(trafficLabel);
             rightPnl.add(trafficPane);
-            rightPnl.add(connect);
-            rightPnl.add(quit);
             rightPnl.add(specificTrafficLabel);
             rightPnl.add(trafficStart);
             rightPnl.add(trafficStop);
             rightPnl.add(show);
             rightPnl.add(reset);
-
-
             mainPanel.add(rightPnl);
             add(mainPanel);
 		}
+
+        public void setTrafficBox(String msg) {
+            this.trafficBox.setText(msg);
+        }
+
+        public JTextArea getTrafficBox() {
+            return trafficBox;
+        }
 }
