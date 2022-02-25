@@ -10,12 +10,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Random;
 
 public class ClientHandler extends Thread implements PropertyChangeListener {
 
     private PropertyChangeSupport serverPcs;
     private ObjectInputStream in;
     private ObjectOutputStream out;
+    private static ArrayList<String> usedID = new ArrayList<String>();
 
     public ClientHandler(Socket clientSocket, PropertyChangeSupport pcs) {
 
@@ -61,6 +63,19 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
             e.printStackTrace();
         }
 
+    }
+
+    private String generateUserID() {
+
+        Random rand = new Random();
+        String randomID =  String.valueOf(rand.nextInt(9999));
+
+        while (usedID.contains(randomID)) {
+            randomID = String.valueOf(rand.nextInt(9999));
+        }
+
+        return randomID;
+    
     }
 
 }

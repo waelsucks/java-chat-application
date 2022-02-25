@@ -19,6 +19,8 @@ import controller.ServerController;
  * >> java App.java client 999.999.999.999
  */
 public class App {
+
+    // java App.java server
     public static void main(String[] args) {
 
         int serverPort = 2343;

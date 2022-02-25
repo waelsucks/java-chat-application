@@ -1,8 +1,13 @@
 package view;
 import javax.swing.*;
+
+import controller.ClientController;
+
 import java.awt.*;
 
 public class MainPanel extends JPanel {
+
+    private ClientController controller;
     private JLabel userLabel, trafficLabel, specificTrafficLabel;
     private JButton quit, send, pic, connect, addContact, show, reset;
     private JPanel mainPanel, leftPnl, centerPnl, btnPnl, rightPnl;
@@ -10,12 +15,13 @@ public class MainPanel extends JPanel {
     private JScrollPane chatPane, messagePane, userPane, trafficPane;
     private JTextField trafficStart, trafficStop;
 
-    public static void main(String[] args) {
-        new MainPanel();    
-    }
+    // public static void main(String[] args) {
+    //     new MainPanel();    
+    // }
 
-    public MainPanel() { 
+    public MainPanel(ClientController clientController) { 
         createComponents();
+        this.controller = clientController;
         JFrame frame = new JFrame("Chatty chatti chat away...");
         frame.add(this);
         frame.setVisible(true);

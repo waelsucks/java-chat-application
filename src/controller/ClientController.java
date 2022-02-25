@@ -6,6 +6,8 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
+import view.MainPanel;
+
 public class ClientController {
 
     private ObjectInputStream input = null;
@@ -13,11 +15,13 @@ public class ClientController {
     private Socket socket;
     private String serverAddress;
     private int serverPort;
+    private MainPanel view;
 
     public ClientController(String serverString, int portInt) {
 
         this.serverAddress = serverString;
         this.serverPort = portInt;
+        this.view = new MainPanel(this);
 
         Scanner in = new Scanner(System.in);
 

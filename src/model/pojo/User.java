@@ -4,8 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.swing.ImageIcon;
+
 /**
- * A Class meant to be used by the Server to create and save a new User. A client will 
+ * A Class meant to be used by the Server to create and save a new User. A
+ * client will
  * then enter a username and recieve the correct user object.
  */
 
@@ -14,29 +17,14 @@ public class User implements Serializable {
     private String userID;
     private String name;
     private UserGroup group;
-    private static ArrayList<String> usedID = new ArrayList<String>();
+    private ImageIcon icon;
 
-    public User(String name, UserGroup group) {
+    public User(String name, UserGroup group, String userID, ImageIcon icon) {
 
         this.name = name;
         this.group = group;
-
-        this.userID = generateUserID();
-        usedID.add(this.userID);
-
-    }
-
-    private String generateUserID() {
-
-        Random rand = new Random();
-        String randomID =  String.valueOf(rand.nextInt(9999));
-
-        while (usedID.contains(randomID)) {
-            randomID = String.valueOf(rand.nextInt(9999));
-        }
-
-        return randomID;
-    
+        this.icon = icon;
+        this.userID = userID;
     }
 
     public String getUserID() {
