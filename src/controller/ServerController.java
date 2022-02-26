@@ -22,7 +22,7 @@ import model.pojo.User;
 import model.pojo.UserGroup;
 import view.ServerGUI;
 
-public class ServerController extends Thread implements PropertyChangeListener{
+public class ServerController extends Thread implements PropertyChangeListener {
 
     private ServerSocket serverSocket;
     private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
@@ -35,7 +35,7 @@ public class ServerController extends Thread implements PropertyChangeListener{
         System.out.println("Starting server!");
 
         pcs.addPropertyChangeListener(this);
-        this.serverGUI = new ServerGUI(this);  
+        this.serverGUI = new ServerGUI(this);
         this.events = new ArrayList<TrafficPackage>();
 
         try {
@@ -54,11 +54,15 @@ public class ServerController extends Thread implements PropertyChangeListener{
 
             try {
 
+                // Waiting for a client to connect
+
                 Socket clientSocket = serverSocket.accept();
 
-                System.out.println("A user has joined. Referring them to a handler.");
-                addPropertyChangeListener(new ClientHandler(clientSocket, pcs));
+                // Redirecting client to a handler and setting up a two way communication
+                // between handler and server
 
+                ClientHandler handler = new ClientHandler(clientSocket, this);
+                addPropertyChangeListener(handler);
 
             } catch (IOException e) {
 
@@ -68,8 +72,6 @@ public class ServerController extends Thread implements PropertyChangeListener{
         }
 
     }
-
-    
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
@@ -82,31 +84,39 @@ public class ServerController extends Thread implements PropertyChangeListener{
 
             case "package":
 
-                TrafficPackage tp = (TrafficPackage) evt.getNewValue();
+                TrafficPackage tpFromHandler = (TrafficPackage) evt.getNewValue();
 
-                switch (tp.getType()) {
+                switch (tpFromHandler.getType()) {
 
                     case MESSAGE:
-                        pcs.firePropertyChange("public message", null, tp);
+                        pcs.firePropertyChange("public message", null, tpFromHandler);
                         break;
 
                     case CONNECT:
-                        pcs.firePropertyChange("public message", null, new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(tp.getUser().getName() + " has logged in!"), tp.getUser()));
+
+                        User user = tpFromHandler.getUser();
+                        String message = tpFromHandler.getUser().getName() + " has logged in!";
+
+                        TrafficPackage userConnect = new TrafficPackage(PackageType.MESSAGE, new Date(),
+                                new Message(message), user);
+
+                        pcs.firePropertyChange("public message", null, userConnect);
                         break;
-                
+
                     default:
                         break;
                 }
 
-                events.add(tp);
-                serverGUI.getTrafficBox().append(String.format("[%s] >> %s \n", tp.getDate(), tp.getType()));
-                
+                events.add(tpFromHandler);
+                serverGUI.getTrafficBox()
+                        .append(String.format("[%s] >> %s \n", tpFromHandler.getDate(), tpFromHandler.getType()));
+
                 break;
-        
+
             default:
                 break;
         }
-        
+
     }
 
 }

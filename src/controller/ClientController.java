@@ -34,21 +34,17 @@ public class ClientController {
 
         connect();
 
-        // Logging in
-
-        String username = JOptionPane.showInputDialog("Enter username");
-
-        try {
-            out.writeObject(username);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         this.view = new MainPanel(this);
 
     }
 
     public void connect() {
+
+        // Logging in
+
+        String username = JOptionPane.showInputDialog("Enter username");
+        TrafficPackage usernamePackage = new TrafficPackage(PackageType.CONNECT, new Date(), new Message(username),
+                null);
 
         try {
 
@@ -59,6 +55,8 @@ public class ClientController {
 
             input = new ObjectInputStream(
                     socket.getInputStream());
+
+            out.writeObject(usernamePackage);
 
             clientConnected = true;
             listen = new Listener();
@@ -86,10 +84,15 @@ public class ClientController {
 
     public void disconnect() {
         try {
+            
             clientConnected = false;
             out.writeObject(new TrafficPackage(PackageType.DISCONNECT, new Date(),
                     new Message("Disconnecting " + socket.getInetAddress()), user));
             out.flush();
+
+            socket.close();
+            input.close();
+            out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,26 +108,38 @@ public class ClientController {
 
                     try {
 
+                        // Client will listen for messages from the handler and act accordingly
+
                         TrafficPackage tp = (TrafficPackage) input.readObject();
 
-                        if (tp.getType() == PackageType.NEW_USER) {
-                            String name = JOptionPane.showInputDialog("Welcome! Enter your name: ");
-                            out.writeObject(name);
-                        }
+                        switch (tp.getType()) {
 
-                        if (tp.getType() == PackageType.USER) {
-                            user = (User) tp.getEvent();
-                            System.out.println("My name is " + user.getName());
-                        }
+                            case NEW_USER:
 
-                        if (tp.getType() == PackageType.MESSAGE) {
-                            String toWrite = String.format("[%s] >> %s \n", tp.getUser().getName(), tp.getEvent().getMessage());
-                            view.getChatBox().append(toWrite);
+                                String name = JOptionPane.showInputDialog("Welcome! Enter your name: ");
+                                out.writeObject(name);
+
+                                break;
+
+                            case USER:
+
+                                user = (User) tp.getEvent();
+                                break;
+
+                            case MESSAGE:
+
+                                String toWrite = String.format("[%s] >> %s \n", tp.getUser().getName(),
+                                        tp.getEvent().getMessage());
+                                view.getChatBox().append(toWrite);
+
+                                break;
+
+                            default:
+                                break;
                         }
 
                     } catch (Exception e) {
-                        // System.out.println("Disconnecting");
-                        // disconnect();
+                        e.printStackTrace();
                     }
 
                 }

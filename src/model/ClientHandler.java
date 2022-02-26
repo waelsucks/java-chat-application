@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.Random;
 import java.util.jar.Attributes.Name;
 
+import controller.ServerController;
 import model.pojo.PackageInterface;
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
@@ -24,31 +25,20 @@ import model.pojo.UserGroup;
 
 public class ClientHandler extends Thread implements PropertyChangeListener {
 
-    private PropertyChangeSupport serverPcs;
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private Socket clientSocket;
+    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
-    public ClientHandler(Socket clientSocket, PropertyChangeSupport pcs) {
+    public ClientHandler(Socket clientSocket, ServerController serverController) {
 
         this.clientSocket = clientSocket;
-        this.serverPcs = pcs;
+        addPropertyChangeListener(serverController);
 
         try {
+
             out = new ObjectOutputStream(clientSocket.getOutputStream());
-            out.flush();
             in = new ObjectInputStream(clientSocket.getInputStream());
-            
-
-            // Check username
-
-            String username = (String) in.readObject();
-
-            User user = checkUser(username);
-            out.writeObject(new TrafficPackage(PackageType.USER, new Date(), user,user));
-            out.flush();
-
-            serverPcs.firePropertyChange("package", null, new TrafficPackage(PackageType.CONNECT, new Date(), user, user));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,6 +82,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
         }
 
         for (User user_ : persons) {
+            System.out.println(user_.getName());
             if (user_.getUserID().equals(username)) {
                 return user_;
             }
@@ -113,9 +104,10 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
                 new BufferedOutputStream(new FileOutputStream("files/Users.dat")))) {
 
             user = new User(name, UserGroup.USER, username, null);
+            out.writeObject(new TrafficPackage(PackageType.USER, new Date(), user, user));
+            out.flush();
             oos.writeObject(user);
             oos.flush();
-            oos.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -130,20 +122,33 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
             try {
 
+                // The client handler awaits communication from the client and sends it to the server.
+
                 TrafficPackage message = (TrafficPackage) in.readObject();
 
                 switch (message.getType()) {
 
+                    case CONNECT:
+
+                        User user = checkUser(message.getEvent().getMessage());
+
+                        TrafficPackage connectPackage = new TrafficPackage(PackageType.CONNECT, new Date(), user, user);
+
+                        out.writeObject(connectPackage);
+                        pcs.firePropertyChange("package", null, connectPackage);
+
+                        break;
+
                     case DISCONNECT:
 
                         clientSocket.close();
-                        serverPcs.firePropertyChange("package", null, message);
+                        pcs.firePropertyChange("package", null, message);
                         interrupt();
                         break;
 
                     case MESSAGE:
 
-                        serverPcs.firePropertyChange("package", null, message);
+                        pcs.firePropertyChange("package", null, message);
                         break;
 
                     default:
@@ -158,40 +163,20 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
     }
 
-    // private User createUser() {
-
-    // // LoginGUI beep = new LoginGUI()
-
-    // User user = new User(beep.getName(), beep.getGroup(), beep.getUserID(),
-    // beep.getImage());
-
-    // }
-
-    // private String generateUserID(){
-
-    // Random rand = new Random();
-    // String randomID = String.valueOf(rand.nextInt(9999));
-
-    // while(userID.contains(randomID)){
-    // randomID = String
-    // }
-
-    // }
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
 
-        TrafficPackage tp = (TrafficPackage) evt.getNewValue();
+        TrafficPackage tpFromServer = (TrafficPackage) evt.getNewValue();
 
         switch (evt.getPropertyName()) {
 
             case "public message":
 
-                switch (tp.getType()) {
+                switch (tpFromServer.getType()) {
 
                     case MESSAGE:
                         try {
-                            out.writeObject(tp);
+                            out.writeObject(tpFromServer);
                             out.flush();
                         } catch (IOException e1) {
                             e1.printStackTrace();
@@ -209,12 +194,16 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
     }
 
-    public PropertyChangeSupport getServerPcs() {
-        return this.serverPcs;
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        pcs.addPropertyChangeListener(listener);
     }
 
-    public void setServerPcs(PropertyChangeSupport serverPcs) {
-        this.serverPcs = serverPcs;
+    public PropertyChangeSupport getPcs() {
+        return this.pcs;
+    }
+
+    public void setPcs(PropertyChangeSupport serverPcs) {
+        this.pcs = serverPcs;
     }
 
     public ObjectInputStream getIn() {
