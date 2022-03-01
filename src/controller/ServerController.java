@@ -34,7 +34,6 @@ public class ServerController extends Thread implements PropertyChangeListener {
 
         System.out.println("Starting server!");
 
-        pcs.addPropertyChangeListener(this);
         this.serverGUI = new ServerGUI(this);
         this.events = new ArrayList<TrafficPackage>();
 
@@ -80,42 +79,48 @@ public class ServerController extends Thread implements PropertyChangeListener {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
 
-        switch (evt.getPropertyName()) {
+        // Handler recieves a TrafficPackage from a client
+        // and report it to the server. Server will register this traffic package and
+        // then tell the handler(s) what to do.
 
-            case "package":
+        TrafficPackage packageFromHandler = (TrafficPackage) evt.getNewValue();
 
-                TrafficPackage tpFromHandler = (TrafficPackage) evt.getNewValue();
+        switch (packageFromHandler.getType()) {
 
-                switch (tpFromHandler.getType()) {
+            case CLIENT_CONNECT:
 
-                    case MESSAGE:
-                        pcs.firePropertyChange("public message", null, tpFromHandler);
-                        break;
+                // Client is connecting
 
-                    case CONNECT:
-
-                        User user = tpFromHandler.getUser();
-                        String message = tpFromHandler.getUser().getName() + " has logged in!";
-
-                        TrafficPackage userConnect = new TrafficPackage(PackageType.MESSAGE, new Date(),
-                                new Message(message), user);
-
-                        pcs.firePropertyChange("public message", null, userConnect);
-                        break;
-
-                    default:
-                        break;
+                try {
+                    pcs.firePropertyChange("package", null, packageFromHandler);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
-                events.add(tpFromHandler);
-                serverGUI.getTrafficBox()
-                        .append(String.format("[%s] >> %s \n", tpFromHandler.getDate(), tpFromHandler.getType()));
+                break;
 
+            case CLIENT_DISCONNECT:
+
+                // Client is disconnecting
+
+                pcs.firePropertyChange("package", null, packageFromHandler);
+
+                break;
+
+            case MESSAGE:
+
+                pcs.firePropertyChange("package", null, packageFromHandler);
                 break;
 
             default:
                 break;
         }
+
+        events.add(packageFromHandler);
+
+        serverGUI.getTrafficBox()
+                .append(String.format("[%s] >> %s \n", packageFromHandler.getDate(),
+                        packageFromHandler.getType()));
 
     }
 

@@ -2,9 +2,11 @@ package model.pojo;
 
 public enum PackageType {
 
-    MESSAGE,
-    CONNECT,
-    DISCONNECT,
-    USER, NEW_USER
+    // The different package types sent between client -> handler -> server
+
+    CLIENT_CONNECT,
+    CLIENT_DISCONNECT,
+    USER,
+    MESSAGE, NEW_USER
 
 }

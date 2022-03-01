@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Date;
-import java.util.Scanner;
 
 import javax.swing.JOptionPane;
 
@@ -32,9 +31,9 @@ public class ClientController {
         this.serverAddress = serverString;
         this.serverPort = portInt;
 
-        connect();
-
         this.view = new MainPanel(this);
+
+        connect();
 
     }
 
@@ -43,7 +42,8 @@ public class ClientController {
         // Logging in
 
         String username = JOptionPane.showInputDialog("Enter username");
-        TrafficPackage usernamePackage = new TrafficPackage(PackageType.CONNECT, new Date(), new Message(username),
+
+        TrafficPackage usernamePackage = new TrafficPackage(PackageType.CLIENT_CONNECT, new Date(), new Message(username),
                 null);
 
         try {
@@ -84,15 +84,11 @@ public class ClientController {
 
     public void disconnect() {
         try {
-            
-            clientConnected = false;
-            out.writeObject(new TrafficPackage(PackageType.DISCONNECT, new Date(),
-                    new Message("Disconnecting " + socket.getInetAddress()), user));
+
+            out.writeObject(new TrafficPackage(PackageType.CLIENT_DISCONNECT, new Date(),
+                    user, user));
             out.flush();
 
-            socket.close();
-            input.close();
-            out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -117,7 +113,10 @@ public class ClientController {
                             case NEW_USER:
 
                                 String name = JOptionPane.showInputDialog("Welcome! Enter your name: ");
-                                out.writeObject(name);
+
+                                TrafficPackage namePackage = new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(name), null);
+
+                                out.writeObject(namePackage);
 
                                 break;
 
@@ -131,6 +130,12 @@ public class ClientController {
                                 String toWrite = String.format("[%s] >> %s \n", tp.getUser().getName(),
                                         tp.getEvent().getMessage());
                                 view.getChatBox().append(toWrite);
+
+                                break;
+
+                            case CLIENT_DISCONNECT:
+
+                                interrupt();
 
                                 break;
 
