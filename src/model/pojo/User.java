@@ -2,7 +2,6 @@ package model.pojo;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Random;
 
 import javax.swing.ImageIcon;
 
@@ -18,6 +17,8 @@ public class User implements Serializable, PackageInterface {
     private String name;
     private UserGroup group;
     private ImageIcon icon;
+    private boolean status;
+    private ArrayList<String> friends;
 
     public User(String name, UserGroup group, String userID, ImageIcon icon) {
 
@@ -25,6 +26,51 @@ public class User implements Serializable, PackageInterface {
         this.group = group;
         this.icon = icon;
         this.userID = userID;
+        this.status = false;
+    }
+
+    public void addFriend(String username) {
+        friends.add(username);
+    }
+
+    public void removeFriend(String username) {
+        for (String string : friends) {
+            if (string.equals(username)) {
+                friends.remove(string);
+            }
+        }
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
+
+    public ImageIcon getIcon() {
+        return this.icon;
+    }
+
+    public void setIcon(ImageIcon icon) {
+        this.icon = icon;
+    }
+
+    public boolean isStatus() {
+        return this.status;
+    }
+
+    public boolean getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public ArrayList<String> getFriends() {
+        return this.friends;
+    }
+
+    public void setFriends(ArrayList<String> friends) {
+        this.friends = friends;
     }
 
     public String getUserID() {
@@ -47,11 +93,11 @@ public class User implements Serializable, PackageInterface {
         this.group = group;
     }
 
-    public void setImage(ImageIcon icon){
+    public void setImage(ImageIcon icon) {
         this.icon = icon;
     }
 
-    public ImageIcon getImage(){
+    public ImageIcon getImage() {
         return this.icon;
     }
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.JOptionPane;
@@ -12,6 +13,7 @@ import model.pojo.Message;
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
+import model.pojo.UserList;
 import view.MainPanel;
 
 public class ClientController {
@@ -94,6 +96,20 @@ public class ClientController {
         }
     }
 
+    public void addContact() {
+        try {
+
+            //TrafficPackage usernamePackage = new TrafficPackage(PackageType.ADD_CONTACT, new Date(), new Message(username),
+            //    null);
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public class Listener extends Thread {
 
         @Override
@@ -131,11 +147,17 @@ public class ClientController {
                                         tp.getEvent().getMessage());
                                 view.getChatBox().append(toWrite);
 
+                                updateOnlineUsers();
+
                                 break;
 
                             case CLIENT_DISCONNECT:
 
                                 interrupt();
+
+                                break;
+
+                            case ADD_CONTACT:
 
                                 break;
 
@@ -148,6 +170,23 @@ public class ClientController {
                     }
 
                 }
+            }
+
+        }
+
+        private void updateOnlineUsers() {
+
+            // here we update the online users.
+
+            try {
+
+                out.writeObject(new TrafficPackage(PackageType.GET_ONLINE_USERS, new Date(), null, null));
+                TrafficPackage tp = (TrafficPackage) input.readObject();
+
+                view.setUserBoxValue((UserList) tp.getEvent());
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
         }

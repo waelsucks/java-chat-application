@@ -24,7 +24,7 @@ public class ServerController extends Thread implements PropertyChangeListener {
     private ServerSocket serverSocket;
     private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private ServerGUI serverGUI;
-    private ArrayList<User> users;
+    private ArrayList<User> users = null;
 
     private ArrayList<TrafficPackage> events;
 
@@ -33,6 +33,7 @@ public class ServerController extends Thread implements PropertyChangeListener {
         System.out.println("Starting server!");
 
         users = readUsers();
+        new usersListener();
 
         this.serverGUI = new ServerGUI(this);
         this.events = new ArrayList<TrafficPackage>();
@@ -56,10 +57,9 @@ public class ServerController extends Thread implements PropertyChangeListener {
             persons = (ArrayList<User>) ois.readObject();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            persons = new ArrayList<User>();
+            System.out.println("Resetting users...");
         }
-
-        new usersListener();
 
         return persons;
     }
@@ -102,10 +102,25 @@ public class ServerController extends Thread implements PropertyChangeListener {
         public void run() {
 
             while (true) {
-                synchronized (users) {
+                try {
 
-                    writeUsers();
+                    synchronized (users) {
 
+                        users.wait();
+
+                        try (ObjectOutputStream ous = new ObjectOutputStream(
+                                new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
+
+                            ous.writeObject(users);
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -114,19 +129,6 @@ public class ServerController extends Thread implements PropertyChangeListener {
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
-    }
-
-    private void writeUsers() {
-
-        try (ObjectOutputStream ous = new ObjectOutputStream(
-                new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
-
-            ous.writeObject(users);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
     @Override
@@ -144,6 +146,12 @@ public class ServerController extends Thread implements PropertyChangeListener {
 
                 // Client is connecting
 
+                for (User user : users) {
+                    if (packageFromHandler.getUser().getUserID().equals(user.getUserID())) {
+                        user.setStatus(true);
+                    }
+                }
+
                 try {
                     pcs.firePropertyChange("package", null, packageFromHandler);
                 } catch (Exception e) {
@@ -155,6 +163,12 @@ public class ServerController extends Thread implements PropertyChangeListener {
             case CLIENT_DISCONNECT:
 
                 // Client is disconnecting
+
+                for (User user : users) {
+                    if (packageFromHandler.getUser().getUserID().equals(user.getUserID())) {
+                        user.setStatus(false);
+                    }
+                }
 
                 pcs.firePropertyChange("package", null, packageFromHandler);
 
@@ -175,8 +189,50 @@ public class ServerController extends Thread implements PropertyChangeListener {
                 .append(String.format("[%s] >> %s \n", packageFromHandler.getDate(),
                         packageFromHandler.getType()));
 
-        users.notifyAll();
+        synchronized (users) {
+            users.notifyAll();
+        }
 
+    }
+
+    public ServerSocket getServerSocket() {
+        return this.serverSocket;
+    }
+
+    public void setServerSocket(ServerSocket serverSocket) {
+        this.serverSocket = serverSocket;
+    }
+
+    public PropertyChangeSupport getPcs() {
+        return this.pcs;
+    }
+
+    public void setPcs(PropertyChangeSupport pcs) {
+        this.pcs = pcs;
+    }
+
+    public ServerGUI getServerGUI() {
+        return this.serverGUI;
+    }
+
+    public void setServerGUI(ServerGUI serverGUI) {
+        this.serverGUI = serverGUI;
+    }
+
+    public ArrayList<User> getUsers() {
+        return this.users;
+    }
+
+    public void setUsers(ArrayList<User> users) {
+        this.users = users;
+    }
+
+    public ArrayList<TrafficPackage> getEvents() {
+        return this.events;
+    }
+
+    public void setEvents(ArrayList<TrafficPackage> events) {
+        this.events = events;
     }
 
 }

@@ -4,9 +4,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -16,10 +13,12 @@ import java.util.Date;
 
 import controller.ServerController;
 import model.pojo.Message;
+import model.pojo.PackageInterface;
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
 import model.pojo.UserGroup;
+import model.pojo.UserList;
 
 public class ClientHandler extends Thread implements PropertyChangeListener {
 
@@ -27,9 +26,11 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
     private ObjectOutputStream out;
     private Socket clientSocket;
     private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private ServerController controller;
 
     public ClientHandler(Socket clientSocket, ServerController serverController) {
 
+        this.controller = serverController;
         this.clientSocket = clientSocket;
         addPropertyChangeListener(serverController);
 
@@ -105,11 +106,24 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
                         break;
 
+                    case GET_ONLINE_USERS:
+
+                        packageToClient = new TrafficPackage(PackageType.USER, new Date(), getOnlineUsers(), null);
+
+                        try {
+                            out.writeObject(packageToClient);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        break;
+
                     default:
                         break;
                 }
 
             } catch (Exception e) {
+                e.printStackTrace();
                 interrupt();
             }
 
@@ -171,76 +185,63 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
     private User getUser(String username) {
 
-        User user = null;
+        User userReturn = null;
 
-        try (ObjectInputStream ois = new ObjectInputStream(
-                new BufferedInputStream(new FileInputStream("files/Users.chat")))) {
-
-            try {
-
-                @SuppressWarnings("unchecked")
-                ArrayList<User> persons = (ArrayList<User>) ois.readObject();
-
-                for (User user_ : persons) {
-
-                    if (user_.getUserID().equals(username)) {
-                        return user_;
-                    }
-
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
+        for (User user : controller.getUsers()) {
+            if (user.getUserID().equals(username)) {
+                userReturn = user;
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
-        return user;
+        return userReturn;
     }
 
     private User addUser(String username) {
 
         // Creates a user and adds them to the "database"
 
-        try (ObjectInputStream ois = new ObjectInputStream(
-                new BufferedInputStream(new FileInputStream("files/Users.chat")))) {
+        try {
+            out.writeObject(
+                    new TrafficPackage(PackageType.NEW_USER, new Date(), new Message("Requesting username"), null));
+            out.flush();
 
-            try {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-                @SuppressWarnings("unchecked")
-                ArrayList<User> persons = (ArrayList<User>) ois.readObject();
+        TrafficPackage packageFromClient = null;
 
-                out.writeObject(new TrafficPackage(PackageType.NEW_USER, new Date(), null, null));
-                out.flush();
-
-                TrafficPackage packageFromClient = null;
-
-                packageFromClient = (TrafficPackage) in.readObject();
-
-                String name = packageFromClient.getEvent().getMessage();
-
-                persons.add(new User(name, UserGroup.USER, username, null));
-
-                try (ObjectOutputStream ous = new ObjectOutputStream(
-                        new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
-
-                    ous.writeObject(persons);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
+        try {
+            packageFromClient = (TrafficPackage) in.readObject();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        String name = packageFromClient.getEvent().getMessage();
+
+        controller.getUsers().add(new User(name, UserGroup.USER, username, null));
+
+        synchronized (controller.getUsers()) {
+            controller.getUsers().notifyAll();
+        }
+
         return getUser(username);
+    }
+
+    private UserList getOnlineUsers() {
+
+        UserList onlineUsers = new UserList();
+
+        synchronized (controller.getUsers()) {
+            for (User user : controller.getUsers()) {
+                if (user.getStatus()) {
+                    onlineUsers.add(user);
+                }
+            }
+        }
+
+        return onlineUsers;
+
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
