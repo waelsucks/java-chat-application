@@ -1,8 +1,11 @@
 package model.pojo;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 /**
@@ -16,15 +19,15 @@ public class User implements Serializable, PackageInterface {
     private String userID;
     private String name;
     private UserGroup group;
-    private ImageIcon icon;
+    private ImageIcon iconFile;
     private boolean status;
     private ArrayList<String> friends;
 
-    public User(String name, UserGroup group, String userID, ImageIcon icon) {
+    public User(String name, UserGroup group, String userID) {
 
         this.name = name;
         this.group = group;
-        this.icon = icon;
+        iconFile = new ImageIcon("images/new-image.png");
         this.userID = userID;
         this.status = false;
     }
@@ -45,12 +48,12 @@ public class User implements Serializable, PackageInterface {
         this.userID = userID;
     }
 
-    public ImageIcon getIcon() {
-        return this.icon;
+    public ImageIcon getIconFile() {
+        return this.iconFile;
     }
 
-    public void setIcon(ImageIcon icon) {
-        this.icon = icon;
+    public void setIconFile(ImageIcon icon) {
+        this.iconFile = icon;
     }
 
     public boolean isStatus() {
@@ -91,14 +94,6 @@ public class User implements Serializable, PackageInterface {
 
     public void setGroup(UserGroup group) {
         this.group = group;
-    }
-
-    public void setImage(ImageIcon icon) {
-        this.icon = icon;
-    }
-
-    public ImageIcon getImage() {
-        return this.icon;
     }
 
     @Override

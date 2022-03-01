@@ -16,11 +16,12 @@ public class MainPanel extends JPanel {
 
     private ClientController controller;
     private JLabel userLabel;
-    private JButton quit, send, pic, addContact, connect, disconnect;
+    private JButton quit, send, pic, connect, disconnect, showProfile;
     private JPanel mainPanel, leftPnl, centerPnl, btnPnl;
     private JTextArea chatBox, messageBox;
     private JList<String> userBox;
     private JScrollPane chatPane, messagePane, userPane;
+    private ArrayList<User> users = new ArrayList<User>();
 
     // public static void main(String[] args) {
     // new MainPanel();
@@ -32,12 +33,25 @@ public class MainPanel extends JPanel {
         });
         getConnect().addActionListener(l -> {
             controller.connect();
+            getConnect().setEnabled(false);
+            getDisconnect().setEnabled(true);
+            getSend().setEnabled(true);
+            getShowProfile().setEnabled(true);
+            getPic().setEnabled(true);
         });
         getDisconnect().addActionListener(e -> {
             controller.disconnect();
+            getDisconnect().setEnabled(false);
+            getConnect().setEnabled(true);
+            getSend().setEnabled(false);
+            getShowProfile().setEnabled(false);
+            getPic().setEnabled(false);
+
         });
-        getAddContact().addActionListener(e -> {
-            controller.addContact();
+        getShowProfile().addActionListener(e -> {
+            controller.getProfile(
+                users.get(userBox.getSelectedIndex()).getUserID()
+            );
         });
     }
 
@@ -50,6 +64,7 @@ public class MainPanel extends JPanel {
         frame.pack();
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getConnect().setEnabled(false);
         createActionEvents();
     }
 
@@ -79,17 +94,17 @@ public class MainPanel extends JPanel {
 
         userPane = new JScrollPane(userBox);
         userPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        userPane.setPreferredSize(new Dimension(160, 430));
+        userPane.setPreferredSize(new Dimension(160, 460));
 
-        addContact = new JButton("Add a friend");
-        addContact.setPreferredSize(new Dimension(160, 30));
-        addContact.setBackground(new Color(0, 0, 0));
-        addContact.setForeground(new Color(50, 205, 50));
-        addContact.setFont(new Font("Monospaced", Font.BOLD, 13));
+        showProfile = new JButton("Show Profile");
+        showProfile.setPreferredSize(new Dimension(160, 30));
+        showProfile.setBackground(new Color(0, 0, 0));
+        showProfile.setForeground(new Color(50, 205, 50));
+        showProfile.setFont(new Font("Monospaced", Font.BOLD, 13));
 
         leftPnl.add(userLabel);
         leftPnl.add(userPane);
-        leftPnl.add(addContact);
+        leftPnl.add(showProfile);
 
         ////////////////////////////////////////////////
         centerPnl = new JPanel();
@@ -133,7 +148,7 @@ public class MainPanel extends JPanel {
         disconnect.setForeground(new Color(50, 205, 50));
         disconnect.setFont(new Font("Monospaced", Font.BOLD, 13));
 
-        pic = new JButton("Upload Pic");
+        pic = new JButton("Send Pic");
         pic.setPreferredSize(new Dimension(120, 30));
         pic.setBackground(new Color(0, 0, 0));
         pic.setForeground(new Color(50, 205, 50));
@@ -180,7 +195,9 @@ public class MainPanel extends JPanel {
         return userBox;
     }
 
-    public void setUserBoxValue(ArrayList<User> users) {
+    public void setUserBoxValue(ArrayList<User> usersparam) {
+
+        users = usersparam;
 
         String[] toView = new String[users.size()];
 
@@ -190,14 +207,7 @@ public class MainPanel extends JPanel {
 
         }
 
-        // userBox = new JList<String>(toView);
         userBox.setListData(toView);
-
-        userBox.addListSelectionListener(e -> {
-            controller.openProfile(
-                users.get(userBox.getSelectedIndex())
-            );
-        });
         
     }
 
@@ -214,12 +224,15 @@ public class MainPanel extends JPanel {
         return connect;
     }
 
+    public JButton getShowProfile() {
+        return showProfile;
+    }
+
     public JButton getDisconnect() {
         return disconnect;
     }
 
-    public JButton getAddContact() {
-        return addContact;
+    public JButton getPic() { 
+        return pic; 
     }
-
 }

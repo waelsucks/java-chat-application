@@ -8,100 +8,122 @@ import javax.swing.*;
 import controller.ClientController;
 
 public class UserGUI extends JPanel {
-    private JLabel usernameLbl, picLbl;
-    private JButton upload, logIn;
-    private JPanel mainPanel, rightPnl;
-    private JTextField username;
     private ClientController controller;
+    private JLabel usernameLbl, realNameLbl, statusLbl, picLabel;
+	private JButton upload, logIn, addFriend;
+	private JPanel mainPanel, rightPnl;
+    private ImageIcon icon = null;
+    private String picText;
 
-    // public static void main(String[] args) {
-    // LoginGUI lgui = new LoginGUI();
-    // }
-
-    public UserGUI(ClientController controller) {
-        createComponents();
-        JFrame frame = new JFrame("Welcome New Person...");
-        frame.add(this);
-        frame.setVisible(true);
-        frame.pack();
-        frame.setResizable(false);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.controller = controller;
-        addActionListeners();
-    }
-
-    private void addActionListeners() {
-
-		getUpload().addActionListener(l -> {
-
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setMultiSelectionEnabled(false);
-
-            if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-
-                File file = fileChooser.getSelectedFile();
-                controller.upload(file);
-                
-            }
-
-        });
-
+	public static void main(String[] args) {
+		//UserGUI lgui = new UserGUI();
 	}
 
-    private void createComponents() {
-        setPreferredSize(new Dimension(400, 200));
-        setLayout(new BorderLayout());
+	private void createActionEvents() {
+		/*getUpload().addActionListener(l -> { 
+			controller.upload();
+		});
+	    getAddFriend().addActionListener(l -> {
+			controller.addFriend();
+		});*/
+	}
 
-        mainPanel = new JPanel();
-        mainPanel.setPreferredSize(new Dimension(400, 200));
-        mainPanel.setBackground(new Color(0, 0, 0));
-        mainPanel.setForeground(new Color(50, 205, 50));
+	public UserGUI(ClientController controller) {
+        this.controller = controller;
+		createComponents();
+		JFrame frame = new JFrame("Contact");
+		frame.add(this);
+		frame.setVisible(true);
+		frame.pack();
+		frame.setResizable(false);
+		createActionEvents();
+	}
 
-        rightPnl = new JPanel();
-        rightPnl.setBackground(new Color(0, 0, 0));
-        rightPnl.setPreferredSize(new Dimension(380, 180));
+	private void createComponents() {
+		setPreferredSize(new Dimension(400, 250));
+		setLayout(new BorderLayout());
 
-        usernameLbl = new JLabel("Enter your name: ");
-        usernameLbl.setFont(new Font("Monospaced", Font.BOLD, 13));
-        usernameLbl.setForeground(new Color(50, 205, 50));
+		mainPanel = new JPanel();
+		mainPanel.setPreferredSize(new Dimension(400, 250));
+		mainPanel.setBackground(new Color(0, 0, 0));
+		mainPanel.setForeground(new Color(50, 205, 50));
 
-        username = new JTextField();
-        username.setEditable(true);
-        username.setBackground(new Color(230, 230, 250));
-        username.setFont(new Font("Monospaced", Font.BOLD, 13));
-        username.setPreferredSize(new Dimension(380, 30));
+		rightPnl = new JPanel();
+		rightPnl.setBackground(new Color(0, 0, 0));
+		rightPnl.setPreferredSize(new Dimension(380, 230));
 
-        picLbl = new JLabel("Choose your profile picture");
-        picLbl.setFont(new Font("Monospaced", Font.BOLD, 13));
-        picLbl.setForeground(new Color(50, 205, 50));
+		usernameLbl = new JLabel("");
+		usernameLbl.setFont(new Font("Monospaced", Font.BOLD, 13));
+		usernameLbl.setForeground(new Color(50, 205, 50));
+		usernameLbl.setPreferredSize(new Dimension(370, 30));
 
-        upload = new JButton("Upload");
-        upload.setPreferredSize(new Dimension(380, 30));
-        upload.setBackground(new Color(0, 0, 0));
-        upload.setForeground(new Color(50, 205, 50));
-        upload.setFont(new Font("Monospaced", Font.BOLD, 13));
+        // picLabel = new JLabel(); 
+		// java.awt.Image newimg = icon.getImage().getScaledInstance(40,40, java.awt.Image.SCALE_SMOOTH);
+		// icon = new ImageIcon(newimg);
+		// picLabel.setIcon(icon);
+        
+        picLabel = new JLabel();
 
-        logIn = new JButton("Log In");
-        logIn.setPreferredSize(new Dimension(380, 30));
-        logIn.setBackground(new Color(0, 0, 0));
-        logIn.setForeground(new Color(50, 205, 50));
-        logIn.setFont(new Font("Monospaced", Font.BOLD, 13));
+		realNameLbl = new JLabel("");
+		realNameLbl.setFont(new Font("Monospaced", Font.BOLD, 13));
+		realNameLbl.setForeground(new Color(50, 205, 50));
+		realNameLbl.setPreferredSize(new Dimension(370, 30));
+		
+		statusLbl = new JLabel("");
+		statusLbl.setFont(new Font("Monospaced", Font.BOLD, 13));
+		statusLbl.setForeground(new Color(50, 205, 50));
+		statusLbl.setPreferredSize(new Dimension(370, 30));
 
-        rightPnl.add(usernameLbl);
-        rightPnl.add(username);
-        rightPnl.add(picLbl);
-        rightPnl.add(upload);
-        rightPnl.add(logIn);
-        mainPanel.add(rightPnl);
-        add(mainPanel);
+		upload = new JButton("Upload Profile Picture");
+		upload.setPreferredSize(new Dimension(370, 30));
+		upload.setBackground(new Color(0, 0, 0));
+		upload.setForeground(new Color(50, 205, 50));
+		upload.setFont(new Font("Monospaced", Font.BOLD, 13));
+		
+		addFriend = new JButton("Add friend :)");
+		addFriend.setPreferredSize(new Dimension(370, 30));
+		addFriend.setBackground(new Color(0, 0, 0));
+		addFriend.setForeground(new Color(50, 205, 50));
+		addFriend.setFont(new Font("Monospaced", Font.BOLD, 13));
+
+		rightPnl.add(picLabel);
+		rightPnl.add(usernameLbl);
+		rightPnl.add(realNameLbl);
+		rightPnl.add(statusLbl);
+		
+		rightPnl.add(upload);
+		rightPnl.add(addFriend);
+		mainPanel.add(rightPnl);
+		add(mainPanel);
+	}
+
+	public void setUsername(String text) {
+		usernameLbl.setText("Username: " + text);
+	}
+	
+	public void setName(String text) {
+		realNameLbl.setText("Name: " + text);
+	}
+	
+	public void setStatus(String text) {
+		statusLbl.setText("Status: " + text);
+	}
+	
+	public JButton getUpload() {
+		return upload;
+	}
+
+	public JButton getAddFriend() {
+		return addFriend;
+	}
+
+    public void setProfilePic(ImageIcon image) { 
+
+        java.awt.Image newimg = image.getImage().getScaledInstance(40,40, java.awt.Image.SCALE_SMOOTH);
+        
+		icon = new ImageIcon(newimg);
+		picLabel.setIcon(icon);
+        //Image im = image.getImage();
+        //this.icon.setImage(im);
     }
-
-    public JButton getUpload() {
-        return upload;
-    }
-
-    public JButton getLogin() {
-        return logIn;
-    }
-
 }

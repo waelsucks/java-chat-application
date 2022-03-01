@@ -94,7 +94,6 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
                                 user, user);
 
                         pcs.firePropertyChange("package", null, packageToServer);
-                        interrupt();
 
                         break;
 
@@ -118,13 +117,37 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
                         break;
 
+                    case GET_USER:
+
+                        User userRequested = getUser(packageFromClient.getEvent().getMessage());
+
+                        packageToClient = new TrafficPackage(PackageType.GET_USER, new Date(), userRequested, user);
+
+                        try {
+                            out.writeObject(packageToClient);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        break;
+
+                    case ADD_CONTACT:
+
+                        break;
+
                     default:
                         break;
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
+
+                TrafficPackage packageToServer = new TrafficPackage(PackageType.CLIENT_DISCONNECT, new Date(),
+                        null, null);
+
+                pcs.firePropertyChange("package", null, packageToServer);
+
                 interrupt();
+
             }
 
         }
@@ -219,7 +242,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
         String name = packageFromClient.getEvent().getMessage();
 
-        controller.getUsers().add(new User(name, UserGroup.USER, username, null));
+        controller.getUsers().add(new User(name, UserGroup.USER, username));
 
         synchronized (controller.getUsers()) {
             controller.getUsers().notifyAll();

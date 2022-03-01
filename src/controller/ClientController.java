@@ -11,11 +11,13 @@ import java.util.Date;
 import javax.swing.JOptionPane;
 
 import model.pojo.Message;
+import model.pojo.PackageInterface;
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
 import model.pojo.UserList;
 import view.MainPanel;
+import view.UserGUI;
 
 public class ClientController {
 
@@ -46,7 +48,8 @@ public class ClientController {
 
         String username = JOptionPane.showInputDialog("Enter username");
 
-        TrafficPackage usernamePackage = new TrafficPackage(PackageType.CLIENT_CONNECT, new Date(), new Message(username),
+        TrafficPackage usernamePackage = new TrafficPackage(PackageType.CLIENT_CONNECT, new Date(),
+                new Message(username),
                 null);
 
         try {
@@ -97,13 +100,16 @@ public class ClientController {
         }
     }
 
-    public void addContact() {
+    public void upload() {
+
+    }
+
+    public void addFriend() {
         try {
 
-            //TrafficPackage usernamePackage = new TrafficPackage(PackageType.ADD_CONTACT, new Date(), new Message(username),
-            //    null);
-
-
+            // TrafficPackage usernamePackage = new TrafficPackage(PackageType.ADD_CONTACT,
+            // new Date(), new Message(username),
+            // null);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -128,10 +134,11 @@ public class ClientController {
                         switch (tp.getType()) {
 
                             case NEW_USER:
-                                
+
                                 String name = JOptionPane.showInputDialog("Welcome! Enter your name: ");
 
-                                TrafficPackage namePackage = new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(name), null);
+                                TrafficPackage namePackage = new TrafficPackage(PackageType.MESSAGE, new Date(),
+                                        new Message(name), null);
 
                                 out.writeObject(namePackage);
 
@@ -159,6 +166,12 @@ public class ClientController {
                                 break;
 
                             case ADD_CONTACT:
+
+                                break;
+
+                            case GET_USER:
+
+                                openProfile((User) tp.getEvent());
 
                                 break;
 
@@ -194,15 +207,38 @@ public class ClientController {
 
     }
 
-    public void openProfile() {
+    public void getProfile(String username) {
 
-        
+        // new UserGUI(this);
+
+        try {
+
+            out.writeObject(new TrafficPackage(PackageType.GET_USER, new Date(), new Message(username), user));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
     public void upload(File file) {
 
+    }
 
+    private void openProfile(User user) {
+
+        UserGUI gui = new UserGUI(this);
+
+        gui.setUsername(user.getUserID());
+        gui.setName(user.getName());
+
+        if (user.getStatus()) {
+            gui.setStatus("Online");
+        } else {
+            gui.setStatus("Offline");
+        }
+
+        gui.setProfilePic(user.getIconFile());
 
     }
 
