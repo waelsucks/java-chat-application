@@ -187,11 +187,17 @@ public class MainPanel extends JPanel {
         for (int i = 0; i < toView.length; i++) {
 
             toView[i] = users.get(i).getName();
-            
+
         }
 
         // userBox = new JList<String>(toView);
         userBox.setListData(toView);
+
+        userBox.addListSelectionListener(e -> {
+            controller.openProfile(
+                users.get(userBox.getSelectedIndex())
+            );
+        });
         
     }
 

@@ -1,5 +1,6 @@
 package controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -127,7 +128,7 @@ public class ClientController {
                         switch (tp.getType()) {
 
                             case NEW_USER:
-
+                                
                                 String name = JOptionPane.showInputDialog("Welcome! Enter your name: ");
 
                                 TrafficPackage namePackage = new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(name), null);
@@ -190,6 +191,18 @@ public class ClientController {
             }
 
         }
+
+    }
+
+    public void openProfile() {
+
+        
+
+    }
+
+    public void upload(File file) {
+
+
 
     }
 
