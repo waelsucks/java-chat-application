@@ -3,23 +3,20 @@ package controller;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-//import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.ArrayList;
 
 import model.ClientHandler;
-import model.pojo.Message;
-import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
-import model.pojo.UserGroup;
 import view.ServerGUI;
 
 public class ServerController extends Thread implements PropertyChangeListener {
@@ -27,12 +24,15 @@ public class ServerController extends Thread implements PropertyChangeListener {
     private ServerSocket serverSocket;
     private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private ServerGUI serverGUI;
+    private ArrayList<User> users;
 
     private ArrayList<TrafficPackage> events;
 
     public ServerController(int port) {
 
         System.out.println("Starting server!");
+
+        users = readUsers();
 
         this.serverGUI = new ServerGUI(this);
         this.events = new ArrayList<TrafficPackage>();
@@ -44,6 +44,24 @@ public class ServerController extends Thread implements PropertyChangeListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private ArrayList<User> readUsers() {
+
+        ArrayList<User> persons = null;
+
+        try (ObjectInputStream ois = new ObjectInputStream(
+                new BufferedInputStream(new FileInputStream("files/Users.chat")))) {
+
+            persons = (ArrayList<User>) ois.readObject();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        new usersListener();
+
+        return persons;
     }
 
     @Override
@@ -72,8 +90,43 @@ public class ServerController extends Thread implements PropertyChangeListener {
 
     }
 
+    private class usersListener extends Thread {
+
+        public usersListener() {
+
+            start();
+
+        }
+
+        @Override
+        public void run() {
+
+            while (true) {
+                synchronized (users) {
+
+                    writeUsers();
+
+                }
+            }
+        }
+
+    }
+
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
+    }
+
+    private void writeUsers() {
+
+        try (ObjectOutputStream ous = new ObjectOutputStream(
+                new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
+
+            ous.writeObject(users);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -121,6 +174,8 @@ public class ServerController extends Thread implements PropertyChangeListener {
         serverGUI.getTrafficBox()
                 .append(String.format("[%s] >> %s \n", packageFromHandler.getDate(),
                         packageFromHandler.getType()));
+
+        users.notifyAll();
 
     }
 

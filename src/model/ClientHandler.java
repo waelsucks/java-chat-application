@@ -73,7 +73,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
                         user = getUser(username);
 
                         if (user == null) {
-                            user = createUser(username);
+                            user = addUser(username);
                         }
 
                         TrafficPackage packageToClient = new TrafficPackage(PackageType.USER, new Date(), user, user);
@@ -173,27 +173,22 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
         User user = null;
 
-        ArrayList<User> persons = new ArrayList<User>();
-
         try (ObjectInputStream ois = new ObjectInputStream(
                 new BufferedInputStream(new FileInputStream("files/Users.chat")))) {
 
             try {
 
-                user = (User) ois.readObject();
+                @SuppressWarnings("unchecked")
+                ArrayList<User> persons = (ArrayList<User>) ois.readObject();
 
-                while (user != null && user instanceof User) {
+                for (User user_ : persons) {
 
-                    persons.add(user);
-
-                    try {
-                        user = (User) ois.readObject();
-                    } catch (Exception e) {
-                        System.out.println("End of file!");
-                        break;
+                    if (user_.getUserID().equals(username)) {
+                        return user_;
                     }
 
                 }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -202,55 +197,50 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
             e.printStackTrace();
         }
 
-        for (User user_ : persons) {
-            System.out.println(user_.getName());
-            if (user_.getUserID().equals(username)) {
-                return user_;
-            }
-        }
-
-        return null;
+        return user;
     }
 
-    private User createUser(String username) {
+    private User addUser(String username) {
 
         // Creates a user and adds them to the "database"
 
-        User user = null;
+        try (ObjectInputStream ois = new ObjectInputStream(
+                new BufferedInputStream(new FileInputStream("files/Users.chat")))) {
 
-        try {
+            try {
 
-            out.writeObject(new TrafficPackage(PackageType.NEW_USER, new Date(), null, null));
-            out.flush();
+                @SuppressWarnings("unchecked")
+                ArrayList<User> persons = (ArrayList<User>) ois.readObject();
 
-        } catch (Exception e1) {
-            e1.printStackTrace();
-        }
+                out.writeObject(new TrafficPackage(PackageType.NEW_USER, new Date(), null, null));
+                out.flush();
 
-        TrafficPackage packageFromClient = null;
+                TrafficPackage packageFromClient = null;
 
-        try {
-            packageFromClient = (TrafficPackage) in.readObject();
-        } catch (Exception e1) {
-            e1.printStackTrace();
-        }
+                packageFromClient = (TrafficPackage) in.readObject();
 
-        String name = packageFromClient.getEvent().getMessage();
+                String name = packageFromClient.getEvent().getMessage();
 
-        try (ObjectOutputStream oos = new ObjectOutputStream(
-                new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
+                persons.add(new User(name, UserGroup.USER, username, null));
 
-            user = new User(name, UserGroup.USER, username, null);
+                try (ObjectOutputStream ous = new ObjectOutputStream(
+                        new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
 
-            oos.writeObject(user);
-            oos.flush();
+                    ous.writeObject(persons);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return user;
-
+        return getUser(username);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
