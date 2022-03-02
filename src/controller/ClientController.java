@@ -6,8 +6,11 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Date;
 import java.util.Scanner;
+
 import javax.swing.JOptionPane;
-import model.pojo.*;
+
+import model.pojo.Message;
+import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
 import view.MainPanel;
