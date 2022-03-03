@@ -1,6 +1,8 @@
 package view; //haii
 
 import javax.swing.*;
+import javax.swing.JPopupMenu.Separator;
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
 
 import controller.ClientController;
 import model.pojo.Message;
@@ -10,10 +12,13 @@ import model.pojo.UserList;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.beans.EventHandler;
 import java.io.File;
 import java.util.ArrayList;
 
-public class MainPanel extends JPanel {
+public class ClientGUI extends JPanel implements KeyListener{
 
     private ClientController controller;
     private JLabel userLabel, contactsLabel;
@@ -84,7 +89,7 @@ public class MainPanel extends JPanel {
 
     }
 
-    public MainPanel(ClientController clientController) {
+    public ClientGUI(ClientController clientController) {
         createComponents();
         this.controller = clientController;
         JFrame frame = new JFrame("Bit by Bit");
@@ -174,6 +179,19 @@ public class MainPanel extends JPanel {
         messageBox.setBackground(new Color(230, 230, 250));
         messagePane = new JScrollPane(messageBox);
         messagePane.setPreferredSize(new Dimension(500, 50));
+
+        messageBox.addKeyListener(this);
+
+        /*messageBox.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                event.consume(); 
+                if (event.isShiftDown()) {
+                    messagePane.appendText(System.getProperty("line.separator"));
+                } else {
+                    sendFunction();
+                }
+            }
+        });*/
 
         send = new JButton("Send");
         send.setPreferredSize(new Dimension(120, 30));
@@ -299,5 +317,27 @@ public class MainPanel extends JPanel {
 
         contactsBox.setListData(toView);
 
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            controller.sendMessage(getMessageBox().getText()); 
+            messageBox.setText(null); 
+            messageBox.resetKeyboardActions();
+            messageBox.setCursor(Cursor.getPredefinedCursor(-1));
+        }        
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        // TODO Auto-generated method stub
+        
     }
 }
