@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.JOptionPane;
+import javax.swing.text.StyledDocument;
 
 import model.pojo.Message;
 import model.pojo.PackageInterface;
@@ -153,8 +154,13 @@ public class ClientController {
 
                                 String toWrite = String.format("[%s] >> %s \n", tp.getUser().getName(),
                                         tp.getEvent().getMessage());
-                                view.getChatBox().append(toWrite);
+                                //view.getChatBox().append(toWrite);
 
+                                //If changing to JTextPane, use these rows instead of APPEND. 
+                                StyledDocument document = (StyledDocument) view.getChatBox().getDocument();
+                                document.insertString(document.getLength(), toWrite, null);
+                                view.getChatBox().setDocument(document);
+                                
                                 updateOnlineUsers();
 
                                 break;
