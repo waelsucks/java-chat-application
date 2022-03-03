@@ -25,6 +25,7 @@ public class MainPanel extends JPanel {
     private JScrollPane chatPane, messagePane, userPane, contactsPane;
     private ImageIcon icon;
     private ArrayList<User> users = new ArrayList<User>();
+    private ArrayList<User> friends = new ArrayList<User>();;
 
     // public static void main(String[] args) {
     // new MainPanel();
@@ -52,27 +53,32 @@ public class MainPanel extends JPanel {
 
         });
         getShowProfile().addActionListener(e -> {
-            controller.getProfile(
-                users.get(userBox.getSelectedIndex()).getUserID()
-            );
+
+            if (userBox.getSelectedIndex() == -1) {
+                controller.getProfile(
+                        friends.get(contactsBox.getSelectedIndex()).getUserID());
+            } else {
+                controller.getProfile(
+                        users.get(userBox.getSelectedIndex()).getUserID());
+            }
         });
         getPic().addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setMultiSelectionEnabled(false);
             if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            
-            //Scaling the picure!!
-            ImageIcon image = new ImageIcon(file.getAbsolutePath());
-            java.awt.Image newimg = image.getImage().getScaledInstance(70,70, java.awt.Image.SCALE_SMOOTH);
-            icon = new ImageIcon(newimg);
+                File file = fileChooser.getSelectedFile();
 
-            try {
-                //controller.sendMessage(icon);
-            } catch (Exception e1) {
-                e1.printStackTrace();
-                System.out.println("Picture Error.");            
-            }
+                // Scaling the picure!!
+                ImageIcon image = new ImageIcon(file.getAbsolutePath());
+                java.awt.Image newimg = image.getImage().getScaledInstance(70, 70, java.awt.Image.SCALE_SMOOTH);
+                icon = new ImageIcon(newimg);
+
+                try {
+                    // controller.sendMessage(icon);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                    System.out.println("Picture Error.");
+                }
             }
         });
 
@@ -152,8 +158,8 @@ public class MainPanel extends JPanel {
 
         chatBox = new JTextPane();
         chatBox.setEditable(false);
-        //chatBox.setLineWrap(true);
-        //chatBox.setWrapStyleWord(true);
+        // chatBox.setLineWrap(true);
+        // chatBox.setWrapStyleWord(true);
         chatPane = new JScrollPane(chatBox);
         chatPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         chatPane.setPreferredSize(new Dimension(500, 430));
@@ -251,7 +257,7 @@ public class MainPanel extends JPanel {
         }
 
         userBox.setListData(toView);
-        
+
     }
 
     ///////////// GS for buttons/////////////
@@ -275,7 +281,23 @@ public class MainPanel extends JPanel {
         return disconnect;
     }
 
-    public JButton getPic() { 
-        return pic; 
+    public JButton getPic() {
+        return pic;
+    }
+
+    public void setContactBoxValue(ArrayList<User> friends) {
+
+        this.friends = friends;
+
+        String[] toView = new String[friends.size()];
+
+        for (int i = 0; i < toView.length; i++) {
+
+            toView[i] = friends.get(i).getName();
+
+        }
+
+        contactsBox.setListData(toView);
+
     }
 }

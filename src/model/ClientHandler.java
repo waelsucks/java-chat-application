@@ -33,7 +33,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
         this.controller = serverController;
         this.clientSocket = clientSocket;
-        
+
         addPropertyChangeListener(serverController);
 
         try {
@@ -107,18 +107,6 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
                         break;
 
-                    case GET_ONLINE_USERS:
-
-                        packageToClient = new TrafficPackage(PackageType.USER, new Date(), getOnlineUsers(), null);
-
-                        try {
-                            out.writeObject(packageToClient);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        break;
-
                     case GET_USER:
 
                         User userRequested = getUser(packageFromClient.getEvent().getMessage());
@@ -134,6 +122,12 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
                         break;
 
                     case ADD_CONTACT:
+
+                        String friend = packageFromClient.getEvent().getMessage();
+
+                        getUser(user.getUserID()).addFriend(friend);
+                        packageToClient = new TrafficPackage(PackageType.MESSAGE, new Date(),
+                                new Message("*** Added contact ***"), user);
 
                         break;
 
@@ -202,6 +196,17 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
                 break;
 
+            case GET_ONLINE_USERS:
+
+                try {
+                    out.writeObject(
+                            new TrafficPackage(PackageType.GET_ONLINE_USERS, new Date(), getOnlineUsers(), null));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+
             default:
                 break;
         }
@@ -211,12 +216,6 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
     private User getUser(String username) {
 
         User userReturn = null;
-
-        // for (User user : controller.getUsers()) {
-        //     if (user.getUserID().equals(username)) {
-        //         userReturn = user;
-        //     }
-        // }
 
         try {
             userReturn = controller.getUsers().get(username);
@@ -250,7 +249,6 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
         String name = packageFromClient.getEvent().getMessage();
 
-        // controller.getUsers().add(username , new User(name, UserGroup.USER, username));
         controller.getUsers().put(username, new User(name, UserGroup.USER, username));
 
         synchronized (controller.getUsers()) {

@@ -12,7 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.text.StyledDocument;
 
 import model.pojo.Message;
-import model.pojo.PackageInterface;
+
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
@@ -105,12 +105,14 @@ public class ClientController {
 
     }
 
-    public void addFriend() {
+    public void addFriend(String username) {
         try {
 
-            // TrafficPackage usernamePackage = new TrafficPackage(PackageType.ADD_CONTACT,
-            // new Date(), new Message(username),
-            // null);
+            TrafficPackage usernamePackage = new TrafficPackage(PackageType.ADD_CONTACT,
+                    new Date(), new Message(username),
+                    user);
+
+            out.writeObject(usernamePackage);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -154,14 +156,12 @@ public class ClientController {
 
                                 String toWrite = String.format("[%s] >> %s \n", tp.getUser().getName(),
                                         tp.getEvent().getMessage());
-                                //view.getChatBox().append(toWrite);
+                                // view.getChatBox().append(toWrite);
 
-                                //If changing to JTextPane, use these rows instead of APPEND. 
+                                // If changing to JTextPane, use these rows instead of APPEND.
                                 StyledDocument document = (StyledDocument) view.getChatBox().getDocument();
                                 document.insertString(document.getLength(), toWrite, null);
                                 view.getChatBox().setDocument(document);
-                                
-                                updateOnlineUsers();
 
                                 break;
 
@@ -181,6 +181,12 @@ public class ClientController {
 
                                 break;
 
+                            case GET_ONLINE_USERS:
+
+                                updateOnlineUsers(tp);
+
+                                break;
+
                             default:
                                 break;
                         }
@@ -194,21 +200,28 @@ public class ClientController {
 
         }
 
-        private void updateOnlineUsers() {
+    }
 
-            // here we update the online users.
+    private void updateOnlineUsers(TrafficPackage tp) {
 
-            try {
+        // here we update the online users.
 
-                out.writeObject(new TrafficPackage(PackageType.GET_ONLINE_USERS, new Date(), null, null));
-                TrafficPackage tp = (TrafficPackage) input.readObject();
+        try {
 
-                view.setUserBoxValue((UserList) tp.getEvent());
+            view.setUserBoxValue((UserList) tp.getEvent());
 
-            } catch (Exception e) {
-                e.printStackTrace();
+            UserList friends = new UserList();
+
+            for (User user_ : (UserList) tp.getEvent()) {
+                if (user.getFriends().contains(user_.getUserID())) {
+                    friends.add(user_);
+                }
             }
 
+            view.setContactBoxValue((UserList) friends);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }

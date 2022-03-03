@@ -30,6 +30,7 @@ public class User implements Serializable, PackageInterface {
         iconFile = new ImageIcon("images/new-image.png");
         this.userID = userID;
         this.status = false;
+        this.friends = new ArrayList<String>();
     }
 
     public void addFriend(String username) {

@@ -20,12 +20,14 @@ public class UserGUI extends JPanel {
 	}
 
 	private void createActionEvents() {
-		/*getUpload().addActionListener(l -> { 
+
+		getUpload().addActionListener(l -> { 
 			controller.upload();
 		});
-	    getAddFriend().addActionListener(l -> {
-			controller.addFriend();
-		});*/
+	    // getAddFriend().addActionListener(l -> {
+		// 	controller.addFriend(usernameLbl.getText());
+		// });
+
 	}
 
 	public UserGUI(ClientController controller) {
@@ -94,6 +96,13 @@ public class UserGUI extends JPanel {
 
 	public void setUsername(String text) {
 		usernameLbl.setText("Username: " + text);
+
+		// Vi kan ändra detta sen.
+
+		getAddFriend().addActionListener(l -> {
+			controller.addFriend(text);
+		});
+
 	}
 	
 	public void setName(String text) {
