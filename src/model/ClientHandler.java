@@ -32,6 +32,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
         this.controller = serverController;
         this.clientSocket = clientSocket;
+        
         addPropertyChangeListener(serverController);
 
         try {

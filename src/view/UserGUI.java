@@ -56,11 +56,6 @@ public class UserGUI extends JPanel {
 		usernameLbl.setFont(new Font("Monospaced", Font.BOLD, 13));
 		usernameLbl.setForeground(new Color(50, 205, 50));
 		usernameLbl.setPreferredSize(new Dimension(370, 30));
-
-        // picLabel = new JLabel(); 
-		// java.awt.Image newimg = icon.getImage().getScaledInstance(40,40, java.awt.Image.SCALE_SMOOTH);
-		// icon = new ImageIcon(newimg);
-		// picLabel.setIcon(icon);
         
         picLabel = new JLabel();
 
@@ -118,12 +113,8 @@ public class UserGUI extends JPanel {
 	}
 
     public void setProfilePic(ImageIcon image) { 
-
-        java.awt.Image newimg = image.getImage().getScaledInstance(40,40, java.awt.Image.SCALE_SMOOTH);
-        
+        java.awt.Image newimg = image.getImage().getScaledInstance(40,40, java.awt.Image.SCALE_SMOOTH);        
 		icon = new ImageIcon(newimg);
 		picLabel.setIcon(icon);
-        //Image im = image.getImage();
-        //this.icon.setImage(im);
     }
 }
