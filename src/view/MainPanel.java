@@ -15,13 +15,13 @@ import java.util.ArrayList;
 public class MainPanel extends JPanel {
 
     private ClientController controller;
-    private JLabel userLabel;
+    private JLabel userLabel, contactsLabel;
     private JButton quit, send, pic, connect, disconnect, showProfile;
     private JPanel mainPanel, leftPnl, centerPnl, btnPnl;
     private JTextArea messageBox;
     private JTextPane chatBox;
-    private JList<String> userBox;
-    private JScrollPane chatPane, messagePane, userPane;
+    private JList<String> userBox, contactsBox;
+    private JScrollPane chatPane, messagePane, userPane, contactsPane;
     private ArrayList<User> users = new ArrayList<User>();
 
     // public static void main(String[] args) {
@@ -95,7 +95,7 @@ public class MainPanel extends JPanel {
 
         userPane = new JScrollPane(userBox);
         userPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        userPane.setPreferredSize(new Dimension(160, 460));
+        userPane.setPreferredSize(new Dimension(160, 200));
 
         showProfile = new JButton("Show Profile");
         showProfile.setPreferredSize(new Dimension(160, 30));
@@ -103,9 +103,25 @@ public class MainPanel extends JPanel {
         showProfile.setForeground(new Color(50, 205, 50));
         showProfile.setFont(new Font("Monospaced", Font.BOLD, 13));
 
+        contactsLabel = new JLabel("Contacts");
+        contactsLabel.setFont(new Font("Monospaced", Font.BOLD, 13));
+        contactsLabel.setForeground(new Color(50, 205, 50));
+
+        contactsBox = new JList<String>();
+        // userBox.setEditable(true);
+        contactsBox.setBackground(new Color(0, 0, 0));
+        contactsBox.setForeground(new Color(50, 205, 50));
+        contactsBox.setFont(new Font("Monospaced", Font.BOLD, 13));
+
+        contactsPane = new JScrollPane(contactsBox);
+        contactsPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        contactsPane.setPreferredSize(new Dimension(160, 200));
+
         leftPnl.add(userLabel);
         leftPnl.add(userPane);
         leftPnl.add(showProfile);
+        leftPnl.add(contactsLabel);
+        leftPnl.add(contactsPane);
 
         ////////////////////////////////////////////////
         centerPnl = new JPanel();
@@ -194,6 +210,10 @@ public class MainPanel extends JPanel {
 
     public JList<String> getUserBox() {
         return userBox;
+    }
+
+    public JList<String> getContactBox() {
+        return contactsBox;
     }
 
     public void setUserBoxValue(ArrayList<User> usersparam) {
