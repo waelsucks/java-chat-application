@@ -18,7 +18,8 @@ public class MainPanel extends JPanel {
     private JLabel userLabel;
     private JButton quit, send, pic, connect, disconnect, showProfile;
     private JPanel mainPanel, leftPnl, centerPnl, btnPnl;
-    private JTextArea chatBox, messageBox;
+    private JTextArea messageBox;
+    private JTextPane chatBox;
     private JList<String> userBox;
     private JScrollPane chatPane, messagePane, userPane;
     private ArrayList<User> users = new ArrayList<User>();
@@ -111,10 +112,10 @@ public class MainPanel extends JPanel {
         centerPnl.setBackground(new Color(0, 0, 0));
         centerPnl.setPreferredSize(new Dimension(550, 630));
 
-        chatBox = new JTextArea();
+        chatBox = new JTextPane();
         chatBox.setEditable(false);
-        chatBox.setLineWrap(true);
-        chatBox.setWrapStyleWord(true);
+        //chatBox.setLineWrap(true);
+        //chatBox.setWrapStyleWord(true);
         chatPane = new JScrollPane(chatBox);
         chatPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         chatPane.setPreferredSize(new Dimension(500, 430));
@@ -179,7 +180,7 @@ public class MainPanel extends JPanel {
         this.chatBox.setText(chatBox);
     }
 
-    public JTextArea getChatBox() {
+    public JTextPane getChatBox() {
         return chatBox;
     }
 
