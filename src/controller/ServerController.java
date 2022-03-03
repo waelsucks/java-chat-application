@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import model.ClientHandler;
 import model.pojo.TrafficPackage;
@@ -24,7 +25,7 @@ public class ServerController extends Thread implements PropertyChangeListener {
     private ServerSocket serverSocket;
     private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private ServerGUI serverGUI;
-    private ArrayList<User> users = null;
+    private HashMap<String, User> users = null;
 
     private ArrayList<TrafficPackage> events;
 
@@ -47,21 +48,22 @@ public class ServerController extends Thread implements PropertyChangeListener {
         }
     }
 
-    private ArrayList<User> readUsers() {
+    private HashMap<String, User> readUsers() {
 
         ArrayList<User> persons = null;
+        HashMap<String, User> users = null;
 
         try (ObjectInputStream ois = new ObjectInputStream(
                 new BufferedInputStream(new FileInputStream("files/Users.chat")))) {
 
-            persons = (ArrayList<User>) ois.readObject();
+            users = (HashMap<String, User>) ois.readObject();
 
         } catch (Exception e) {
-            persons = new ArrayList<User>();
+            users = new HashMap<String, User>();
             System.out.println("Resetting users...");
         }
 
-        return persons;
+        return users;
     }
 
     @Override
@@ -146,11 +148,13 @@ public class ServerController extends Thread implements PropertyChangeListener {
 
                 // Client is connecting
 
-                for (User user : users) {
-                    if (packageFromHandler.getUser().getUserID().equals(user.getUserID())) {
-                        user.setStatus(true);
-                    }
-                }
+                // for (User user : users) {
+                // if (packageFromHandler.getUser().getUserID().equals(user.getUserID())) {
+                // user.setStatus(true);
+                // }
+                // }
+
+                users.get(packageFromHandler.getUser().getUserID()).setStatus(true);
 
                 try {
                     pcs.firePropertyChange("package", null, packageFromHandler);
@@ -164,11 +168,13 @@ public class ServerController extends Thread implements PropertyChangeListener {
 
                 // Client is disconnecting
 
-                for (User user : users) {
-                    if (packageFromHandler.getUser().getUserID().equals(user.getUserID())) {
-                        user.setStatus(false);
-                    }
-                }
+                // for (User user : users) {
+                //     if (packageFromHandler.getUser().getUserID().equals(user.getUserID())) {
+                //         user.setStatus(false);
+                //     }
+                // }
+
+                users.get(packageFromHandler.getUser().getUserID()).setStatus(false);
 
                 pcs.firePropertyChange("package", null, packageFromHandler);
 
@@ -219,20 +225,20 @@ public class ServerController extends Thread implements PropertyChangeListener {
         this.serverGUI = serverGUI;
     }
 
-    public ArrayList<User> getUsers() {
-        return this.users;
-    }
-
-    public void setUsers(ArrayList<User> users) {
-        this.users = users;
-    }
-
     public ArrayList<TrafficPackage> getEvents() {
         return this.events;
     }
 
     public void setEvents(ArrayList<TrafficPackage> events) {
         this.events = events;
+    }
+
+    public HashMap<String, User> getUsers() {
+        return this.users;
+    }
+
+    public void setUsers(HashMap<String, User> users) {
+        this.users = users;
     }
 
 }
