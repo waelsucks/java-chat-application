@@ -27,6 +27,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
     private Socket clientSocket;
     private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private ServerController controller;
+    private User user;
 
     public ClientHandler(Socket clientSocket, ServerController serverController) {
 
@@ -61,7 +62,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
                 TrafficPackage packageFromClient = (TrafficPackage) in.readObject();
                 TrafficPackage packageToServer = null;
 
-                User user = packageFromClient.getUser();
+                // user = packageFromClient.getUser();
 
                 switch (packageFromClient.getType()) {
 
@@ -143,7 +144,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
             } catch (Exception e) {
 
                 TrafficPackage packageToServer = new TrafficPackage(PackageType.CLIENT_DISCONNECT, new Date(),
-                        null, null);
+                        user, user);
 
                 pcs.firePropertyChange("package", null, packageToServer);
 
