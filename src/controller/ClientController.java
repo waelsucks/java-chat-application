@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.text.StyledDocument;
 
@@ -17,7 +18,7 @@ import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
 import model.pojo.UserList;
-import view.MainPanel;
+import view.ClientGUI;
 import view.UserGUI;
 
 public class ClientController {
@@ -27,7 +28,7 @@ public class ClientController {
     private Socket socket;
     private String serverAddress;
     private int serverPort;
-    private MainPanel view;
+    private ClientGUI view;
     private boolean clientConnected;
     private Listener listen;
     private User user;
@@ -37,7 +38,7 @@ public class ClientController {
         this.serverAddress = serverString;
         this.serverPort = portInt;
 
-        this.view = new MainPanel(this);
+        this.view = new ClientGUI(this);
 
         connect();
 
@@ -74,7 +75,6 @@ public class ClientController {
             e.printStackTrace();
 
         }
-
     }
 
     public void sendMessage(String message) {
