@@ -10,6 +10,7 @@ import model.pojo.UserList;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 
 public class MainPanel extends JPanel {
@@ -22,6 +23,7 @@ public class MainPanel extends JPanel {
     private JTextPane chatBox;
     private JList<String> userBox, contactsBox;
     private JScrollPane chatPane, messagePane, userPane, contactsPane;
+    private ImageIcon icon;
     private ArrayList<User> users = new ArrayList<User>();
 
     // public static void main(String[] args) {
@@ -54,6 +56,26 @@ public class MainPanel extends JPanel {
                 users.get(userBox.getSelectedIndex()).getUserID()
             );
         });
+        getPic().addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setMultiSelectionEnabled(false);
+            if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            
+            //Scaling the picure!!
+            ImageIcon image = new ImageIcon(file.getAbsolutePath());
+            java.awt.Image newimg = image.getImage().getScaledInstance(70,70, java.awt.Image.SCALE_SMOOTH);
+            icon = new ImageIcon(newimg);
+
+            try {
+                //controller.sendMessage(icon);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+                System.out.println("Picture Error.");            
+            }
+            }
+        });
+
     }
 
     public MainPanel(ClientController clientController) {
