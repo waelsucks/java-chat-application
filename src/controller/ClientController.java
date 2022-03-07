@@ -1,6 +1,5 @@
 package controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -13,7 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.text.StyledDocument;
 
 import model.pojo.Message;
-
+import model.pojo.PackageInterface;
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
@@ -23,220 +22,136 @@ import view.UserGUI;
 
 public class ClientController {
 
-    private ObjectInputStream input = null;
-    private ObjectOutputStream out = null;
+    private ObjectInputStream inputStream;
+    private ObjectOutputStream outputStream;
+
+    private String address;
+    private int port;
+
     private Socket socket;
-    private String serverAddress;
-    private int serverPort;
+
     private ClientGUI view;
-    private boolean clientConnected;
-    private Listener listen;
     private User user;
 
-    public ClientController(String serverString, int portInt) {
+    private UserList usersOnline = null;
 
-        this.serverAddress = serverString;
-        this.serverPort = portInt;
+    public ClientController(String address, int port) {
 
+        this.address = address;
+        this.port = port;
         this.view = new ClientGUI(this);
+        
 
         connect();
 
     }
 
-    public void connect() {
+    private class Listener extends Thread {
 
-        // Logging in
+        public Listener() {
 
-        String username = JOptionPane.showInputDialog("Enter username");
-
-        TrafficPackage usernamePackage = new TrafficPackage(PackageType.CLIENT_CONNECT, new Date(),
-                new Message(username, null),
-                null);
-
-        try {
-
-            socket = new Socket(serverAddress, serverPort);
-
-            out = new ObjectOutputStream(
-                    socket.getOutputStream());
-
-            input = new ObjectInputStream(
-                    socket.getInputStream());
-
-            out.writeObject(usernamePackage);
-
-            clientConnected = true;
-            listen = new Listener();
-            listen.start();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
+            start();
 
         }
-    }
-
-    public void sendMessage(String message) {
-
-        try {
-            view.getMessageBox().setText(null);
-            out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(message, null), user));
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public void sendPic(String message, ImageIcon icon) {
-        String text;
-
-        if (message == null) {
-            text = "";
-        } else {
-            text = message;
-        }
-
-        try {
-            view.getMessageBox().setText(null);
-            out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(text, icon), user));
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void disconnect() {
-        try {
-
-            out.writeObject(new TrafficPackage(PackageType.CLIENT_DISCONNECT, new Date(),
-                    user, user));
-            out.flush();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void upload() {
-
-    }
-
-    public void addFriend(String username) {
-        try {
-
-            TrafficPackage usernamePackage = new TrafficPackage(PackageType.ADD_CONTACT,
-                    new Date(), new Message(username, null),
-                    user);
-
-            out.writeObject(usernamePackage);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public class Listener extends Thread {
 
         @Override
         public void run() {
 
-            while (!interrupted()) {
-                while (clientConnected) {
+            try {
 
-                    try {
+                while (!interrupted()) {
 
-                        // Client will listen for messages from the handler and act accordingly
+                    // Awaits messages from the server.
 
-                        TrafficPackage tp = (TrafficPackage) input.readObject();
+                    TrafficPackage tp = (TrafficPackage) inputStream.readObject();
 
-                        switch (tp.getType()) {
+                    switch (tp.getType()) {
 
-                            case NEW_USER:
+                        case ASK_USERNAME:
 
-                                String name = JOptionPane.showInputDialog("Welcome! Enter your name: ");
+                            String username = JOptionPane.showInputDialog("Enter username");
 
-                                TrafficPackage namePackage = new TrafficPackage(PackageType.MESSAGE, new Date(),
-                                        new Message(name, null), null);
+                            outputStream.writeObject(
+                                    createPackage(PackageType.ASK_USERNAME, new Message(username, null)));
 
-                                out.writeObject(namePackage);
+                            break;
 
-                                break;
+                        case SIGN_UP:
 
-                            case USER:
+                            String name = JOptionPane.showInputDialog("Enter name");
+                            ImageIcon image = view.chooseImage();
 
-                                user = (User) tp.getEvent();
-                                break;
+                            outputStream.writeObject(
+                                    createPackage(PackageType.SIGN_UP, new Message(name, image)));
 
-                            case MESSAGE:
+                            break;
 
-                                String toWrite = String.format("[%s] >> %s \n", tp.getUser().getName(),
-                                        tp.getEvent().getMessage());
-                                // view.getChatBox().append(toWrite);
+                        case USER:
 
-                                // If changing to JTextPane, use these rows instead of APPEND.
-                                StyledDocument document = (StyledDocument) view.getChatBox().getDocument();
-                                document.insertString(document.getLength(), toWrite, null);
-                                view.getChatBox().setDocument(document);
+                            user = (User) tp.getEvent();
 
-                                break;
+                            JOptionPane.showMessageDialog(null, "Welcome " + user.getName());
 
-                            case CLIENT_DISCONNECT:
+                            outputStream
+                                    .writeObject(new TrafficPackage(PackageType.USER_ONLINE, new Date(), null, user));
 
-                                interrupt();
+                            break;
 
-                                break;
+                        case GET_ONLINE_USERS:
 
-                            case ADD_CONTACT:
+                            view.setUserBoxValue((UserList) tp.getEvent());
+                            usersOnline = (UserList)tp.getEvent();
 
-                                break;
+                            break;
 
-                            case GET_USER:
+                        case GET_USER:
 
-                                openProfile((User) tp.getEvent());
+                            openProfile((User) tp.getEvent());
 
-                                break;
+                            break;
 
-                            case GET_ONLINE_USERS:
+                        case MESSAGE:
 
-                                updateOnlineUsers(tp);
+                            StyledDocument document = (StyledDocument) view.getChatBox().getDocument();
+                            document.insertString(document.getLength(),
+                                    String.format("[%s] >> %s\n", tp.getUser().getName(), tp.getEvent().getMessage()), null);
+                            view.getChatBox().setDocument(document);
 
-                                break;
+                            break;
 
-                            default:
-                                break;
-                        }
+                        default:
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                            break;
+
                     }
 
+                    outputStream.flush();
+
                 }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                interrupt();
             }
 
         }
 
     }
 
-    private void updateOnlineUsers(TrafficPackage tp) {
+    public void connect() {
 
-        // here we update the online users.
+        user = null;
 
         try {
 
-            view.setUserBoxValue((UserList) tp.getEvent());
+            socket = new Socket(address, port);
 
-            UserList friends = new UserList();
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
+            inputStream = new ObjectInputStream(socket.getInputStream());
 
-            for (User user_ : (UserList) tp.getEvent()) {
-                if (user.getFriends().contains(user_.getUserID())) {
-                    friends.add(user_);
-                }
-            }
+            new Listener();
 
-            view.setContactBoxValue((UserList) friends);
+            outputStream.writeObject(new TrafficPackage(PackageType.GET_ONLINE_USERS, null, null, null));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -244,35 +159,82 @@ public class ClientController {
 
     }
 
-    public void getProfile(String username) {
+    public void openProfile(User toShow) {
 
-        // new UserGUI(this);
+        UserGUI profile = new UserGUI(this);
 
-        try {
+        profile.setName(toShow.getName());
+        profile.setProfilePic(toShow.getIconFile());
+        profile.setUsername(toShow.getUserID());
 
-            out.writeObject(new TrafficPackage(PackageType.GET_USER, new Date(), new Message(username, null), user));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void openProfile(User user) {
-
-        UserGUI gui = new UserGUI(this);
-
-        gui.setUsername(user.getUserID());
-        gui.setName(user.getName());
-
-        if (user.getStatus()) {
-            gui.setStatus("Online");
+        if (toShow.getStatus() || toShow.getUserID().equals(user.getUserID())) {
+            profile.setStatus("Online");
         } else {
-            gui.setStatus("Offline");
+            profile.setStatus("Offline");
         }
 
-        gui.setProfilePic(user.getIconFile());
+    }
 
+    /**
+     * Generates a traffic package with the given event. Event must implement
+     * PackageInterface
+     * 
+     * @return A traffic package generated from the event.
+     */
+
+    private TrafficPackage createPackage(PackageType type, PackageInterface event) {
+
+        TrafficPackage packageToSend = new TrafficPackage(type, new Date(), event, user);
+
+        return packageToSend;
+
+    }
+
+    public void sendMessage(String text) {
+
+        // If it is a public message...
+
+        Message message = new Message(text, null);
+
+        message.setTimeSent(new Date());
+        message.setSenderID(user.getUserID());
+        
+        boolean publicMessage = true;
+
+        if (publicMessage) {
+            
+            for (User userOnline : usersOnline) {
+                message.getRecieverID().add(userOnline.getUserID());
+            }
+
+        }
+
+        try {
+            outputStream
+                    .writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), message, user));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void disconnect() {
+    }
+
+    public void getProfile(String userID) {
+
+        try {
+            outputStream.writeObject(new TrafficPackage(PackageType.GET_USER, null, new Message(userID, null), user));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void sendPic(String text, ImageIcon icon) {
+    }
+
+    public void addFriend(String text) {
     }
 
 }

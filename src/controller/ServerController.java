@@ -7,7 +7,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
@@ -16,43 +15,60 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import javax.swing.ImageIcon;
+
 import model.ClientHandler;
+import model.pojo.Message;
+import model.pojo.PackageInterface;
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
+import model.pojo.UserGroup;
 import view.ServerGUI;
 
-public class ServerController extends Thread implements PropertyChangeListener {
+public class ServerController {
 
-    private ServerSocket serverSocket;
-    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    private ServerGUI serverGUI;
-    private HashMap<String, User> users = null;
+    private ServerSocket socket;
+    private PropertyChangeSupport pcs;
 
+    private HashMap<String, User> users;
+    private ServerGUI view;
     private ArrayList<TrafficPackage> events;
 
     public ServerController(int port) {
 
-        System.out.println("Starting server!");
+        System.out.println("Starting server...");
+
+        pcs = new PropertyChangeSupport(this);
+
+        view = new ServerGUI(this);
+        events = new ArrayList<TrafficPackage>(); // This will later be replaced by a file containing events (?)
 
         users = readUsers();
-        new usersListener();
-
-        this.serverGUI = new ServerGUI(this);
-        this.events = new ArrayList<TrafficPackage>();
 
         try {
-            serverSocket = new ServerSocket(port);
-            start();
 
-        } catch (IOException e) {
+            socket = new ServerSocket(port);
+
+            while (true) {
+
+                Socket clientSocket = socket.accept();
+                addPropertyChangeListener(new ClientHandler(clientSocket, this));
+
+            }
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        pcs.addPropertyChangeListener(listener);
     }
 
     private HashMap<String, User> readUsers() {
 
-        ArrayList<User> persons = null;
         HashMap<String, User> users = null;
 
         try (ObjectInputStream ois = new ObjectInputStream(
@@ -68,149 +84,80 @@ public class ServerController extends Thread implements PropertyChangeListener {
         return users;
     }
 
-    @Override
-    public void run() {
-
-        while (!interrupted()) {
-
-            try {
-
-                // Waiting for a client to connect
-
-                Socket clientSocket = serverSocket.accept();
-
-                // Redirecting client to a handler and setting up a two way communication
-                // between handler and server
-
-                ClientHandler handler = new ClientHandler(clientSocket, this);
-                addPropertyChangeListener(handler);
-
-            } catch (IOException e) {
-
-                e.printStackTrace();
-            }
-
-        }
-
-    }
-
-    private class usersListener extends Thread {
-
-        public usersListener() {
-
-            start();
-
-        }
-
-        @Override
-        public void run() {
-
-            while (true) {
-                try {
-
-                    synchronized (users) {
-
-                        users.wait();
-
-                        try (ObjectOutputStream ous = new ObjectOutputStream(
-                                new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
-
-                            ous.writeObject(users);
-
-                            pcs.firePropertyChange("package", null , new TrafficPackage(PackageType.GET_ONLINE_USERS, new Date(), null, null));
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        pcs.addPropertyChangeListener(listener);
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-
-        // Handler recieves a TrafficPackage from a client
-        // and report it to the server. Server will register this traffic package and
-        // then tell the handler(s) what to do.
-
-        TrafficPackage packageFromHandler = (TrafficPackage) evt.getNewValue();
-
-        switch (packageFromHandler.getType()) {
-
-            case CLIENT_CONNECT:
-
-                // Client is connecting
-
-                // for (User user : users) {
-                // if (packageFromHandler.getUser().getUserID().equals(user.getUserID())) {
-                // user.setStatus(true);
-                // }
-                // }
-
-                users.get(packageFromHandler.getUser().getUserID()).setStatus(true);
-
-                try {
-                    pcs.firePropertyChange("package", null, packageFromHandler);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                break;
-
-            case CLIENT_DISCONNECT:
-
-                // Client is disconnecting
-
-                // for (User user : users) {
-                //     if (packageFromHandler.getUser().getUserID().equals(user.getUserID())) {
-                //         user.setStatus(false);
-                //     }
-                // }
-
-                users.get(packageFromHandler.getUser().getUserID()).setStatus(false);
-
-                pcs.firePropertyChange("package", null, packageFromHandler);
-
-                break;
-
-            case MESSAGE:
-
-                pcs.firePropertyChange("package", null, packageFromHandler);
-                break;
-
-            default:
-                break;
-        }
-
-        events.add(packageFromHandler);
-
-        serverGUI.getTrafficBox()
-                .append(String.format("[%s] >> %s \n", packageFromHandler.getDate(),
-                        packageFromHandler.getType()));
+    public void createUser(String username, String name, ImageIcon image) {
 
         synchronized (users) {
-            users.notifyAll();
+
+            users.put(username, new User(name, UserGroup.USER, username, image));
+            updateUsers();
+
         }
 
     }
 
-    public ServerSocket getServerSocket() {
-        return this.serverSocket;
+    public User getUser(String username) {
+
+        User user = null;
+
+        readUsers();
+
+        synchronized (users) {
+            user = users.get(username);
+        }
+
+        return user;
     }
 
-    public void setServerSocket(ServerSocket serverSocket) {
-        this.serverSocket = serverSocket;
+    public void updateUsers() {
+
+        // Writes the current users hashmap to the Users.chat file
+
+        try (ObjectOutputStream ous = new ObjectOutputStream(
+                new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
+
+            ous.writeObject(users);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        readUsers();
+
+    }
+
+    public void logEvent(TrafficPackage tp) {
+
+        events.add(tp);
+
+        StringBuilder string = new StringBuilder();
+
+        if (tp.getType() == PackageType.MESSAGE) {
+
+            Message message = (Message) tp.getEvent();
+
+            string.append(String.format("[%s]\n", new Date()));
+            string.append(tp.getUser().getName() + " has sent a message to:\n");
+
+            for (String id : message.getRecieverID()) {
+                string.append(">> " + getUser(id).getName() + "\n");
+            }
+
+        }
+
+        // view.getTrafficBox()
+        //         .append(String.format("[%s] >> %s \n", tp.getDate(),
+        //                 tp.getType()));
+
+        view.getTrafficBox().append(string.toString() + "\n____________<3_____________\n");
+
+    }
+
+    public ServerSocket getSocket() {
+        return this.socket;
+    }
+
+    public void setSocket(ServerSocket socket) {
+        this.socket = socket;
     }
 
     public PropertyChangeSupport getPcs() {
@@ -221,12 +168,20 @@ public class ServerController extends Thread implements PropertyChangeListener {
         this.pcs = pcs;
     }
 
-    public ServerGUI getServerGUI() {
-        return this.serverGUI;
+    public HashMap<String, User> getUsers() {
+        return this.users;
     }
 
-    public void setServerGUI(ServerGUI serverGUI) {
-        this.serverGUI = serverGUI;
+    public void setUsers(HashMap<String, User> users) {
+        this.users = users;
+    }
+
+    public ServerGUI getView() {
+        return this.view;
+    }
+
+    public void setView(ServerGUI view) {
+        this.view = view;
     }
 
     public ArrayList<TrafficPackage> getEvents() {
@@ -237,12 +192,38 @@ public class ServerController extends Thread implements PropertyChangeListener {
         this.events = events;
     }
 
-    public HashMap<String, User> getUsers() {
-        return this.users;
+    public void userStatus(String username, boolean status) {
+
+        users.get(username).setStatus(status);
+        updateUsers();
+
+        pcs.firePropertyChange("users", null, readUsers());
+
     }
 
-    public void setUsers(HashMap<String, User> users) {
-        this.users = users;
+    public void broadcast(TrafficPackage tp) {
+
+        pcs.firePropertyChange("message", null, tp);
+        logEvent(tp);
+
+    }
+
+    public void sendMessage(TrafficPackage tp) {
+
+        Message message = (Message) tp.getEvent();
+
+        for (PropertyChangeListener pcl : pcs.getPropertyChangeListeners()) {
+
+            ClientHandler handler = (ClientHandler) pcl;
+
+            if (message.getRecieverID().contains(handler.getUsername())) {
+                pcl.propertyChange(new PropertyChangeEvent(this, "message", null, tp));
+            }
+
+        }
+
+        logEvent(tp);
+
     }
 
 }

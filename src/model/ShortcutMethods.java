@@ -1,11 +1,18 @@
-package model;
+// package model;
 
-public class ShortcutMethods {
-    
-    public static void handleEvent() {
+// import model.pojo.TrafficPackage;
 
-        // Does something
+// public class ShortcutMethods {
 
-    }   
+//     /**
+//      * Generates a traffic package with the given event. Event must implement
+//      * PackageInterface
+//      * 
+//      * @return
+//      */
 
-}
+//     public static TrafficPackage create() {
+
+//     }
+
+// }

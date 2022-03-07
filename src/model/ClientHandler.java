@@ -2,8 +2,6 @@ package model;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,7 +9,7 @@ import java.net.Socket;
 import java.util.Date;
 
 import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 import controller.ServerController;
 import model.pojo.Message;
@@ -23,28 +21,17 @@ import model.pojo.UserList;
 
 public class ClientHandler extends Thread implements PropertyChangeListener {
 
-    private ObjectInputStream in;
-    private ObjectOutputStream out;
-    private Socket clientSocket;
-    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private Socket socket;
     private ServerController controller;
-    private User user;
 
-    public ClientHandler(Socket clientSocket, ServerController serverController) {
+    private ObjectInputStream inputStream;
+    private ObjectOutputStream outputStream;
+    private String username;
 
-        this.controller = serverController;
-        this.clientSocket = clientSocket;
+    public ClientHandler(Socket clientSocket, ServerController controller) {
 
-        addPropertyChangeListener(serverController);
-
-        try {
-
-            out = new ObjectOutputStream(clientSocket.getOutputStream());
-            in = new ObjectInputStream(clientSocket.getInputStream());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.socket = clientSocket;
+        this.controller = controller;
 
         start();
 
@@ -53,158 +40,145 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
     @Override
     public void run() {
 
-        while (!interrupted()) {
+        try {
 
-            try {
+            inputStream = new ObjectInputStream(socket.getInputStream());
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
 
-                // The client handler awaits communication from the client and sends it to the
-                // server.
+            // When user first joins, we ask for username.
 
-                TrafficPackage packageFromClient = (TrafficPackage) in.readObject();
-                TrafficPackage packageToServer = null;
+            outputStream.writeObject(new TrafficPackage(PackageType.ASK_USERNAME, null, null, null));
 
-                // user = packageFromClient.getUser();
+            while (!interrupted()) {
 
-                switch (packageFromClient.getType()) {
+                TrafficPackage tp = (TrafficPackage) inputStream.readObject();
 
-                    case CLIENT_CONNECT:
-
-                        // A client wants to connect. Handler will check if user exists, create a new
-                        // one otherwise.
-
-                        String username = packageFromClient.getEvent().getMessage();
-
-                        user = getUser(username);
-
-                        if (user == null) {
-                            user = addUser(username);
-                        }
-
-                        TrafficPackage packageToClient = new TrafficPackage(PackageType.USER, new Date(), user, user);
-
-                        out.writeObject(packageToClient);
-
-                        // Report to server. ( change to normal function? )
-
-                        pcs.firePropertyChange("package", null,
-                                new TrafficPackage(PackageType.CLIENT_CONNECT, new Date(), user, user));
-
-                        break;
-
-                    case CLIENT_DISCONNECT:
-
-                        packageToServer = new TrafficPackage(PackageType.CLIENT_DISCONNECT, new Date(),
-                                user, user);
-
-                        pcs.firePropertyChange("package", null, packageToServer);
-
-                        break;
-
-                    case MESSAGE:
-
-                        packageToServer = new TrafficPackage(PackageType.MESSAGE, new Date(),
-                                packageFromClient.getEvent(), user);
-                        pcs.firePropertyChange("package", null, packageToServer);
-
-                        break;
-
-                    case GET_USER:
-
-                        User userRequested = getUser(packageFromClient.getEvent().getMessage());
-
-                        packageToClient = new TrafficPackage(PackageType.GET_USER, new Date(), userRequested, user);
-
-                        try {
-                            out.writeObject(packageToClient);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        break;
-
-                    case ADD_CONTACT:
-
-                        String friend = packageFromClient.getEvent().getMessage();
-
-                        getUser(user.getUserID()).addFriend(friend);
-                        packageToClient = new TrafficPackage(PackageType.MESSAGE, new Date(),
-                                new Message("*** Added contact ***", null), user);
-
-                        break;
-
-                    default:
-                        break;
-                }
-
-            } catch (Exception e) {
-
-                TrafficPackage packageToServer = new TrafficPackage(PackageType.CLIENT_DISCONNECT, new Date(),
-                        user, user);
-
-                pcs.firePropertyChange("package", null, packageToServer);
-
-                interrupt();
+                handleEvent(tp);
 
             }
 
+        } catch (Exception e) {
+
+            controller.logEvent(
+                    new TrafficPackage(PackageType.CLIENT_DISCONNECT, new Date(), null, controller.getUser(username)));
+            controller.userStatus(username, false);
+
+            e.printStackTrace();
         }
 
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
+    private void handleEvent(TrafficPackage tp) throws IOException {
 
-        // Handler recieving packages from the server
+        // Handles events from client
 
-        TrafficPackage packageFromServer = (TrafficPackage) evt.getNewValue();
-        TrafficPackage packageToClient = null;
+        switch (tp.getType()) {
 
-        switch (packageFromServer.getType()) {
+            case SIGN_UP:
 
-            case CLIENT_CONNECT:
+                // A client sends credentials to sign up
 
-                packageToClient = new TrafficPackage(PackageType.MESSAGE, new Date(),
-                        new Message("Connected!", null), packageFromServer.getUser());
+                Message userSignup = (Message) tp.getEvent();
+                controller.createUser(username, userSignup.getMessage(), userSignup.getImage());
 
-                try {
-                    out.writeObject(packageToClient);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                outputStream.writeObject(
+                        new TrafficPackage(PackageType.USER, null, controller.getUser(username), null));
+
+                controller.logEvent(
+                        new TrafficPackage(PackageType.SIGN_UP, new Date(), null, controller.getUser(username)));
 
                 break;
 
-            case CLIENT_DISCONNECT:
+            case ASK_USERNAME:
 
-                packageToClient = new TrafficPackage(PackageType.MESSAGE, new Date(), new Message("Disconnected!", null),
-                        packageFromServer.getUser());
+                // A client sends username
 
-                try {
-                    out.writeObject(packageToClient);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                username = tp.getEvent().getMessage();
 
-                break;
+                if (controller.getUser(username) == null) {
 
-            case MESSAGE:
+                    outputStream.writeObject(
+                            new TrafficPackage(PackageType.SIGN_UP, null, null, null));
 
-                try {
-                    out.writeObject(packageFromServer);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } else {
+
+                    outputStream.writeObject(
+                            new TrafficPackage(PackageType.USER, null, controller.getUser(username), null));
+
+                    controller.logEvent(
+                            new TrafficPackage(PackageType.CLIENT_CONNECT, new Date(), null,
+                                    controller.getUser(username)));
+
                 }
 
                 break;
 
             case GET_ONLINE_USERS:
 
+                UserList onlineUsers = new UserList();
+
+                for (User user : controller.getUsers().values()) {
+                    if (user.getStatus()) {
+                        onlineUsers.add(user);
+                    }
+                }
+
+                outputStream.writeObject(new TrafficPackage(PackageType.GET_ONLINE_USERS, null, onlineUsers, null));
+
+                break;
+
+            case USER_ONLINE:
+
+                controller.userStatus(tp.getUser().getUserID(), true);
+
+                break;
+
+            case GET_USER:
+
+                User toSend = controller.getUser(tp.getEvent().getMessage());
+
+                outputStream.writeObject(new TrafficPackage(PackageType.GET_USER, null, toSend, null));
+
+                break;
+
+            case MESSAGE:
+
+                controller.sendMessage(tp);
+                break;
+
+            default:
+                break;
+
+        }
+
+        outputStream.flush();
+
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+
+        switch (evt.getPropertyName()) {
+            case "users":
+
                 try {
-                    out.writeObject(
-                            new TrafficPackage(PackageType.GET_ONLINE_USERS, new Date(), getOnlineUsers(), null));
+                    handleEvent(new TrafficPackage(PackageType.GET_ONLINE_USERS, null, null, null));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                break;
+
+            case "message":
+
+                try {
+                    outputStream.writeObject(evt.getNewValue());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+
+            case "user":
 
                 break;
 
@@ -214,109 +188,8 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
     }
 
-    private User getUser(String username) {
-
-        User userReturn = null;
-
-        try {
-            userReturn = controller.getUsers().get(username);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return userReturn;
-    }
-
-    private User addUser(String username) {
-
-        // Creates a user and adds them to the "database"
-
-        try {
-            out.writeObject(
-                    new TrafficPackage(PackageType.NEW_USER, new Date(), new Message("Requesting username", null), null));
-            out.flush();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        TrafficPackage packageFromClient = null;
-
-        try {
-            packageFromClient = (TrafficPackage) in.readObject();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        String name = packageFromClient.getEvent().getMessage();
-        ////inser picture here?
-        
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Choose your profile picture! (png/jpg)");
-        
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            File file = chooser.getSelectedFile();
-            ImageIcon image = new ImageIcon(file.getAbsolutePath());
-            controller.getUsers().put(name, new User(name, UserGroup.USER, username, image));
-        }
-
-        synchronized (controller.getUsers()) {
-            controller.getUsers().notifyAll();
-        }
-
-        return getUser(username);
-    }
-
-    private UserList getOnlineUsers() {
-
-        UserList onlineUsers = new UserList();
-
-        synchronized (controller.getUsers()) {
-            for (User user : controller.getUsers().values()) {
-                if (user.getStatus()) {
-                    onlineUsers.add(user);
-                }
-            }
-        }
-
-        return onlineUsers;
-
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        pcs.addPropertyChangeListener(listener);
-    }
-
-    public PropertyChangeSupport getPcs() {
-        return this.pcs;
-    }
-
-    public void setPcs(PropertyChangeSupport serverPcs) {
-        this.pcs = serverPcs;
-    }
-
-    public ObjectInputStream getIn() {
-        return this.in;
-    }
-
-    public void setIn(ObjectInputStream in) {
-        this.in = in;
-    }
-
-    public ObjectOutputStream getOut() {
-        return this.out;
-    }
-
-    public void setOut(ObjectOutputStream out) {
-        this.out = out;
-    }
-
-    public Socket getClientSocket() {
-        return this.clientSocket;
-    }
-
-    public void setClientSocket(Socket clientSocket) {
-        this.clientSocket = clientSocket;
+    public String getUsername() {
+        return username;
     }
 
 }
