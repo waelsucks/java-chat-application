@@ -23,14 +23,19 @@ public class User implements Serializable, PackageInterface {
     private boolean status;
     private ArrayList<String> friends;
 
-    public User(String name, UserGroup group, String userID) {
+    public User(String name, UserGroup group, String userID, ImageIcon icon) {
 
         this.name = name;
         this.group = group;
-        iconFile = new ImageIcon("images/new-image.png");
         this.userID = userID;
         this.status = false;
         this.friends = new ArrayList<String>();
+
+        if (icon == null) {
+            this.iconFile = new ImageIcon("images/new-image.png");
+        } else {
+            this.iconFile = icon;
+        }
     }
 
     public void addFriend(String username) {

@@ -13,7 +13,6 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -21,7 +20,6 @@ import model.ClientHandler;
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
-import model.pojo.UserList;
 import view.ServerGUI;
 
 public class ServerController extends Thread implements PropertyChangeListener {

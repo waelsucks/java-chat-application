@@ -3,17 +3,18 @@ package model;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Date;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 
 import controller.ServerController;
 import model.pojo.Message;
-import model.pojo.PackageInterface;
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
@@ -127,7 +128,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
                         getUser(user.getUserID()).addFriend(friend);
                         packageToClient = new TrafficPackage(PackageType.MESSAGE, new Date(),
-                                new Message("*** Added contact ***"), user);
+                                new Message("*** Added contact ***", null), user);
 
                         break;
 
@@ -163,7 +164,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
             case CLIENT_CONNECT:
 
                 packageToClient = new TrafficPackage(PackageType.MESSAGE, new Date(),
-                        new Message("Connected!"), packageFromServer.getUser());
+                        new Message("Connected!", null), packageFromServer.getUser());
 
                 try {
                     out.writeObject(packageToClient);
@@ -175,7 +176,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
             case CLIENT_DISCONNECT:
 
-                packageToClient = new TrafficPackage(PackageType.MESSAGE, new Date(), new Message("Disconnected!"),
+                packageToClient = new TrafficPackage(PackageType.MESSAGE, new Date(), new Message("Disconnected!", null),
                         packageFromServer.getUser());
 
                 try {
@@ -232,7 +233,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
         try {
             out.writeObject(
-                    new TrafficPackage(PackageType.NEW_USER, new Date(), new Message("Requesting username"), null));
+                    new TrafficPackage(PackageType.NEW_USER, new Date(), new Message("Requesting username", null), null));
             out.flush();
 
         } catch (IOException e) {
@@ -248,8 +249,16 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
         }
 
         String name = packageFromClient.getEvent().getMessage();
-
-        controller.getUsers().put(username, new User(name, UserGroup.USER, username));
+        ////inser picture here?
+        
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Choose your profile picture! (png/jpg)");
+        
+        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            File file = chooser.getSelectedFile();
+            ImageIcon image = new ImageIcon(file.getAbsolutePath());
+            controller.getUsers().put(name, new User(name, UserGroup.USER, username, image));
+        }
 
         synchronized (controller.getUsers()) {
             controller.getUsers().notifyAll();

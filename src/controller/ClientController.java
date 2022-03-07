@@ -51,7 +51,7 @@ public class ClientController {
         String username = JOptionPane.showInputDialog("Enter username");
 
         TrafficPackage usernamePackage = new TrafficPackage(PackageType.CLIENT_CONNECT, new Date(),
-                new Message(username),
+                new Message(username, null),
                 null);
 
         try {
@@ -81,12 +81,30 @@ public class ClientController {
 
         try {
             view.getMessageBox().setText(null);
-            out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(message), user));
+            out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(message, null), user));
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    public void sendPic(String message, ImageIcon icon) {
+        String text;
+
+        if (message == null) {
+            text = "";
+        } else {
+            text = message;
+        }
+
+        try {
+            view.getMessageBox().setText(null);
+            out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(text, icon), user));
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void disconnect() {
@@ -109,7 +127,7 @@ public class ClientController {
         try {
 
             TrafficPackage usernamePackage = new TrafficPackage(PackageType.ADD_CONTACT,
-                    new Date(), new Message(username),
+                    new Date(), new Message(username, null),
                     user);
 
             out.writeObject(usernamePackage);
@@ -141,7 +159,7 @@ public class ClientController {
                                 String name = JOptionPane.showInputDialog("Welcome! Enter your name: ");
 
                                 TrafficPackage namePackage = new TrafficPackage(PackageType.MESSAGE, new Date(),
-                                        new Message(name), null);
+                                        new Message(name, null), null);
 
                                 out.writeObject(namePackage);
 
@@ -232,15 +250,11 @@ public class ClientController {
 
         try {
 
-            out.writeObject(new TrafficPackage(PackageType.GET_USER, new Date(), new Message(username), user));
+            out.writeObject(new TrafficPackage(PackageType.GET_USER, new Date(), new Message(username, null), user));
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-    }
-
-    public void upload(File file) {
 
     }
 

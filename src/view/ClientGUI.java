@@ -1,20 +1,11 @@
-package view; //haii
+package view; 
 
 import javax.swing.*;
-import javax.swing.JPopupMenu.Separator;
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
-
 import controller.ClientController;
-import model.pojo.Message;
 import model.pojo.User;
-import model.pojo.UserList;
-
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.beans.EventHandler;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -26,9 +17,9 @@ public class ClientGUI extends JPanel implements KeyListener{
     private JPanel mainPanel, leftPnl, centerPnl, btnPnl;
     private JTextArea messageBox;
     private JTextPane chatBox;
+    private ImageIcon icon = null;
     private JList<String> userBox, contactsBox;
     private JScrollPane chatPane, messagePane, userPane, contactsPane;
-    private ImageIcon icon;
     private ArrayList<User> users = new ArrayList<User>();
     private ArrayList<User> friends = new ArrayList<User>();;
 
@@ -71,19 +62,19 @@ public class ClientGUI extends JPanel implements KeyListener{
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setMultiSelectionEnabled(false);
             if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                File file = fileChooser.getSelectedFile();
+            File file = fileChooser.getSelectedFile();
+            
+            //Scaling the picure!!
+            ImageIcon image = new ImageIcon(file.getAbsolutePath());
+            java.awt.Image newimg = image.getImage().getScaledInstance(70,70, java.awt.Image.SCALE_SMOOTH);
+            icon = new ImageIcon(newimg);
 
-                // Scaling the picure!!
-                ImageIcon image = new ImageIcon(file.getAbsolutePath());
-                java.awt.Image newimg = image.getImage().getScaledInstance(70, 70, java.awt.Image.SCALE_SMOOTH);
-                icon = new ImageIcon(newimg);
-
-                try {
-                    // controller.sendMessage(icon);
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                    System.out.println("Picture Error.");
-                }
+            try {
+                controller.sendPic(getMessageBox().getText(),icon);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+                System.out.println("Picture Error.");            
+            }
             }
         });
 
@@ -181,17 +172,6 @@ public class ClientGUI extends JPanel implements KeyListener{
         messagePane.setPreferredSize(new Dimension(500, 50));
 
         messageBox.addKeyListener(this);
-
-        /*messageBox.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                event.consume(); 
-                if (event.isShiftDown()) {
-                    messagePane.appendText(System.getProperty("line.separator"));
-                } else {
-                    sendFunction();
-                }
-            }
-        });*/
 
         send = new JButton("Send");
         send.setPreferredSize(new Dimension(120, 30));
