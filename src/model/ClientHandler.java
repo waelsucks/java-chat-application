@@ -1,23 +1,11 @@
 package model;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.beans.*;
+import java.io.*;
 import java.net.Socket;
-import java.util.Date;
-
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
-
-import controller.ServerController;
-import model.pojo.Message;
-import model.pojo.PackageType;
-import model.pojo.TrafficPackage;
-import model.pojo.User;
-import model.pojo.UserGroup;
-import model.pojo.UserList;
+import java.util.*;
+import controller.*;
+import model.pojo.*;
 
 public class ClientHandler extends Thread implements PropertyChangeListener {
 
