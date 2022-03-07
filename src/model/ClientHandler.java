@@ -1,24 +1,11 @@
 package model;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.beans.*;
+import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Date;
-
-import controller.ServerController;
-import model.pojo.Message;
-import model.pojo.PackageInterface;
-import model.pojo.PackageType;
-import model.pojo.TrafficPackage;
-import model.pojo.User;
-import model.pojo.UserGroup;
-import model.pojo.UserList;
+import java.util.*;
+import controller.*;
+import model.pojo.*;
 
 public class ClientHandler extends Thread implements PropertyChangeListener {
 
@@ -56,7 +43,7 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
 
             try {
 
-                // The client handler awaits communication from the client and sends it to the
+                // The clienthandler awaits communication from the client and sends it to the
                 // server.
 
                 TrafficPackage packageFromClient = (TrafficPackage) in.readObject();
