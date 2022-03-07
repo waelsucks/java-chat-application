@@ -7,31 +7,26 @@ import javax.swing.ImageIcon;
 public class Message implements PackageInterface, Serializable {
     
     private String message;
-    private ImageIcon icon;
+    private ImageIcon image;
 
-    public Message(String message) {
-        this.message = message;
+    public ImageIcon getImage() {
+        return image;
     }
 
-    public Message(ImageIcon icon) {
-        this.icon = icon;
+    public void setImage(ImageIcon image) {
+        this.image = image;
+    }
+
+    public Message(String message, ImageIcon image) {
+        this.message = message;
     }
 
     public String getMessage() {
         return this.message;
     }
+
     public void setMessage(String message) {
         this.message = message;
     }
-
-    public ImageIcon getIconMessage() {
-        return this.icon;
-    }
-   
-    public void setIcon() {
-        this.icon = icon;
-    }
-
-
 
 }

@@ -13,9 +13,11 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import model.ClientHandler;
+import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
 import view.ServerGUI;
@@ -114,6 +116,8 @@ public class ServerController extends Thread implements PropertyChangeListener {
                                 new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
 
                             ous.writeObject(users);
+
+                            pcs.firePropertyChange("package", null , new TrafficPackage(PackageType.GET_ONLINE_USERS, new Date(), null, null));
 
                         } catch (Exception e) {
                             e.printStackTrace();

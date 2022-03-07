@@ -8,16 +8,17 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.text.StyledDocument;
 
 import model.pojo.Message;
-import model.pojo.PackageInterface;
+
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
 import model.pojo.UserList;
-import view.MainPanel;
+import view.ClientGUI;
 import view.UserGUI;
 
 public class ClientController {
@@ -27,7 +28,7 @@ public class ClientController {
     private Socket socket;
     private String serverAddress;
     private int serverPort;
-    private MainPanel view;
+    private ClientGUI view;
     private boolean clientConnected;
     private Listener listen;
     private User user;
@@ -37,7 +38,7 @@ public class ClientController {
         this.serverAddress = serverString;
         this.serverPort = portInt;
 
-        this.view = new MainPanel(this);
+        this.view = new ClientGUI(this);
 
         connect();
 
@@ -50,7 +51,7 @@ public class ClientController {
         String username = JOptionPane.showInputDialog("Enter username");
 
         TrafficPackage usernamePackage = new TrafficPackage(PackageType.CLIENT_CONNECT, new Date(),
-                new Message(username),
+                new Message(username, null),
                 null);
 
         try {
@@ -74,19 +75,36 @@ public class ClientController {
             e.printStackTrace();
 
         }
-
     }
 
     public void sendMessage(String message) {
 
         try {
             view.getMessageBox().setText(null);
-            out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(message), user));
+            out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(message, null), user));
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    public void sendPic(String message, ImageIcon icon) {
+        String text;
+
+        if (message == null) {
+            text = "";
+        } else {
+            text = message;
+        }
+
+        try {
+            view.getMessageBox().setText(null);
+            out.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(text, icon), user));
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void disconnect() {
@@ -105,12 +123,14 @@ public class ClientController {
 
     }
 
-    public void addFriend() {
+    public void addFriend(String username) {
         try {
 
-            // TrafficPackage usernamePackage = new TrafficPackage(PackageType.ADD_CONTACT,
-            // new Date(), new Message(username),
-            // null);
+            TrafficPackage usernamePackage = new TrafficPackage(PackageType.ADD_CONTACT,
+                    new Date(), new Message(username, null),
+                    user);
+
+            out.writeObject(usernamePackage);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -139,7 +159,7 @@ public class ClientController {
                                 String name = JOptionPane.showInputDialog("Welcome! Enter your name: ");
 
                                 TrafficPackage namePackage = new TrafficPackage(PackageType.MESSAGE, new Date(),
-                                        new Message(name), null);
+                                        new Message(name, null), null);
 
                                 out.writeObject(namePackage);
 
@@ -154,14 +174,12 @@ public class ClientController {
 
                                 String toWrite = String.format("[%s] >> %s \n", tp.getUser().getName(),
                                         tp.getEvent().getMessage());
-                                //view.getChatBox().append(toWrite);
+                                // view.getChatBox().append(toWrite);
 
-                                //If changing to JTextPane, use these rows instead of APPEND. 
+                                // If changing to JTextPane, use these rows instead of APPEND.
                                 StyledDocument document = (StyledDocument) view.getChatBox().getDocument();
                                 document.insertString(document.getLength(), toWrite, null);
                                 view.getChatBox().setDocument(document);
-                                
-                                updateOnlineUsers();
 
                                 break;
 
@@ -181,6 +199,12 @@ public class ClientController {
 
                                 break;
 
+                            case GET_ONLINE_USERS:
+
+                                updateOnlineUsers(tp);
+
+                                break;
+
                             default:
                                 break;
                         }
@@ -194,21 +218,28 @@ public class ClientController {
 
         }
 
-        private void updateOnlineUsers() {
+    }
 
-            // here we update the online users.
+    private void updateOnlineUsers(TrafficPackage tp) {
 
-            try {
+        // here we update the online users.
 
-                out.writeObject(new TrafficPackage(PackageType.GET_ONLINE_USERS, new Date(), null, null));
-                TrafficPackage tp = (TrafficPackage) input.readObject();
+        try {
 
-                view.setUserBoxValue((UserList) tp.getEvent());
+            view.setUserBoxValue((UserList) tp.getEvent());
 
-            } catch (Exception e) {
-                e.printStackTrace();
+            UserList friends = new UserList();
+
+            for (User user_ : (UserList) tp.getEvent()) {
+                if (user.getFriends().contains(user_.getUserID())) {
+                    friends.add(user_);
+                }
             }
 
+            view.setContactBoxValue((UserList) friends);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
@@ -219,15 +250,11 @@ public class ClientController {
 
         try {
 
-            out.writeObject(new TrafficPackage(PackageType.GET_USER, new Date(), new Message(username), user));
+            out.writeObject(new TrafficPackage(PackageType.GET_USER, new Date(), new Message(username, null), user));
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-    }
-
-    public void upload(File file) {
 
     }
 

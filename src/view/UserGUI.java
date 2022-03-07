@@ -1,37 +1,30 @@
 package view;
 
 import java.awt.*;
-import java.io.File;
-
 import javax.swing.*;
-
 import controller.ClientController;
 
 public class UserGUI extends JPanel {
     private ClientController controller;
     private JLabel usernameLbl, realNameLbl, statusLbl, picLabel;
-	private JButton upload, logIn, addFriend;
+	private JButton addFriend;
 	private JPanel mainPanel, rightPnl;
     private ImageIcon icon = null;
-    private String picText;
 
 	public static void main(String[] args) {
 		//UserGUI lgui = new UserGUI();
 	}
 
 	private void createActionEvents() {
-		/*getUpload().addActionListener(l -> { 
-			controller.upload();
-		});
 	    getAddFriend().addActionListener(l -> {
-			controller.addFriend();
-		});*/
+			controller.addFriend(usernameLbl.getText());
+		});
 	}
 
 	public UserGUI(ClientController controller) {
         this.controller = controller;
 		createComponents();
-		JFrame frame = new JFrame("Contact");
+		JFrame frame = new JFrame("Profile Info");
 		frame.add(this);
 		frame.setVisible(true);
 		frame.pack();
@@ -40,17 +33,17 @@ public class UserGUI extends JPanel {
 	}
 
 	private void createComponents() {
-		setPreferredSize(new Dimension(400, 250));
+		setPreferredSize(new Dimension(400, 220));
 		setLayout(new BorderLayout());
 
 		mainPanel = new JPanel();
-		mainPanel.setPreferredSize(new Dimension(400, 250));
+		mainPanel.setPreferredSize(new Dimension(400, 220));
 		mainPanel.setBackground(new Color(0, 0, 0));
 		mainPanel.setForeground(new Color(50, 205, 50));
 
 		rightPnl = new JPanel();
 		rightPnl.setBackground(new Color(0, 0, 0));
-		rightPnl.setPreferredSize(new Dimension(380, 230));
+		rightPnl.setPreferredSize(new Dimension(380, 200));
 
 		usernameLbl = new JLabel("");
 		usernameLbl.setFont(new Font("Monospaced", Font.BOLD, 13));
@@ -68,12 +61,6 @@ public class UserGUI extends JPanel {
 		statusLbl.setFont(new Font("Monospaced", Font.BOLD, 13));
 		statusLbl.setForeground(new Color(50, 205, 50));
 		statusLbl.setPreferredSize(new Dimension(370, 30));
-
-		upload = new JButton("Upload Profile Picture");
-		upload.setPreferredSize(new Dimension(370, 30));
-		upload.setBackground(new Color(0, 0, 0));
-		upload.setForeground(new Color(50, 205, 50));
-		upload.setFont(new Font("Monospaced", Font.BOLD, 13));
 		
 		addFriend = new JButton("Add friend :)");
 		addFriend.setPreferredSize(new Dimension(370, 30));
@@ -86,7 +73,6 @@ public class UserGUI extends JPanel {
 		rightPnl.add(realNameLbl);
 		rightPnl.add(statusLbl);
 		
-		rightPnl.add(upload);
 		rightPnl.add(addFriend);
 		mainPanel.add(rightPnl);
 		add(mainPanel);
@@ -102,10 +88,6 @@ public class UserGUI extends JPanel {
 	
 	public void setStatus(String text) {
 		statusLbl.setText("Status: " + text);
-	}
-	
-	public JButton getUpload() {
-		return upload;
 	}
 
 	public JButton getAddFriend() {

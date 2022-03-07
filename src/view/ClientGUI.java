@@ -1,19 +1,15 @@
-package view; //haii
+package view; 
 
 import javax.swing.*;
-
 import controller.ClientController;
-import model.pojo.Message;
 import model.pojo.User;
-import model.pojo.UserList;
-
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.ArrayList;
 
-public class MainPanel extends JPanel {
+public class ClientGUI extends JPanel implements KeyListener{
 
     private ClientController controller;
     private JLabel userLabel, contactsLabel;
@@ -21,10 +17,11 @@ public class MainPanel extends JPanel {
     private JPanel mainPanel, leftPnl, centerPnl, btnPnl;
     private JTextArea messageBox;
     private JTextPane chatBox;
+    private ImageIcon icon = null;
     private JList<String> userBox, contactsBox;
     private JScrollPane chatPane, messagePane, userPane, contactsPane;
-    private ImageIcon icon;
     private ArrayList<User> users = new ArrayList<User>();
+    private ArrayList<User> friends = new ArrayList<User>();;
 
     // public static void main(String[] args) {
     // new MainPanel();
@@ -52,9 +49,14 @@ public class MainPanel extends JPanel {
 
         });
         getShowProfile().addActionListener(e -> {
-            controller.getProfile(
-                users.get(userBox.getSelectedIndex()).getUserID()
-            );
+
+            if (userBox.getSelectedIndex() == -1) {
+                controller.getProfile(
+                        friends.get(contactsBox.getSelectedIndex()).getUserID());
+            } else {
+                controller.getProfile(
+                        users.get(userBox.getSelectedIndex()).getUserID());
+            }
         });
         getPic().addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
@@ -68,7 +70,7 @@ public class MainPanel extends JPanel {
             icon = new ImageIcon(newimg);
 
             try {
-                //controller.sendMessage(icon);
+                controller.sendPic(getMessageBox().getText(),icon);
             } catch (Exception e1) {
                 e1.printStackTrace();
                 System.out.println("Picture Error.");            
@@ -78,7 +80,7 @@ public class MainPanel extends JPanel {
 
     }
 
-    public MainPanel(ClientController clientController) {
+    public ClientGUI(ClientController clientController) {
         createComponents();
         this.controller = clientController;
         JFrame frame = new JFrame("Bit by Bit");
@@ -152,8 +154,8 @@ public class MainPanel extends JPanel {
 
         chatBox = new JTextPane();
         chatBox.setEditable(false);
-        //chatBox.setLineWrap(true);
-        //chatBox.setWrapStyleWord(true);
+        // chatBox.setLineWrap(true);
+        // chatBox.setWrapStyleWord(true);
         chatPane = new JScrollPane(chatBox);
         chatPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         chatPane.setPreferredSize(new Dimension(500, 430));
@@ -168,6 +170,8 @@ public class MainPanel extends JPanel {
         messageBox.setBackground(new Color(230, 230, 250));
         messagePane = new JScrollPane(messageBox);
         messagePane.setPreferredSize(new Dimension(500, 50));
+
+        messageBox.addKeyListener(this);
 
         send = new JButton("Send");
         send.setPreferredSize(new Dimension(120, 30));
@@ -251,7 +255,7 @@ public class MainPanel extends JPanel {
         }
 
         userBox.setListData(toView);
-        
+
     }
 
     ///////////// GS for buttons/////////////
@@ -275,7 +279,45 @@ public class MainPanel extends JPanel {
         return disconnect;
     }
 
-    public JButton getPic() { 
-        return pic; 
+    public JButton getPic() {
+        return pic;
+    }
+
+    public void setContactBoxValue(ArrayList<User> friends) {
+
+        this.friends = friends;
+
+        String[] toView = new String[friends.size()];
+
+        for (int i = 0; i < toView.length; i++) {
+
+            toView[i] = friends.get(i).getName();
+
+        }
+
+        contactsBox.setListData(toView);
+
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            controller.sendMessage(getMessageBox().getText()); 
+            messageBox.setText(null); 
+            messageBox.resetKeyboardActions();
+            messageBox.setCursor(Cursor.getPredefinedCursor(-1));
+        }        
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        // TODO Auto-generated method stub
+        
     }
 }
