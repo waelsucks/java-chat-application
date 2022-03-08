@@ -8,7 +8,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import model.pojo.Message;
@@ -116,10 +119,24 @@ public class ClientController {
 
                         case MESSAGE:
 
+                            Message message = (Message) tp.getEvent();
+
                             StyledDocument document = (StyledDocument) view.getChatBox().getDocument();
+                            Style m = document.addStyle("message", null);
+
                             document.insertString(document.getLength(),
-                                    String.format("[%s] >> %s\n", tp.getUser().getName(), tp.getEvent().getMessage()),
+                                    String.format("[%s] >> %s\n", tp.getUser().getName(), message.getMessage()),
                                     null);
+                            
+                            if (message.getImage() != null) {
+                                
+                                // view.getChatBox().insertIcon(message.getImage());
+                                // view.getChatBox().add(new JLabel(message.getImage()));
+                                StyleConstants.setIcon(m, message.getImage());
+                                document.insertString(document.getLength(), "\n", m);                                
+
+                            }
+                            
                             view.getChatBox().setDocument(document);
 
                             break;
@@ -203,7 +220,7 @@ public class ClientController {
 
     }
 
-    public void sendMessage(String text, ArrayList<String> recievers) {
+    public void sendMessage(String text, ImageIcon icon , ArrayList<String> recievers) {
 
         // If it is a public message...
 
@@ -211,6 +228,7 @@ public class ClientController {
 
         message.setTimeSent(new Date());
         message.setSenderID(user.getUserID());
+        message.setImage(icon);
 
         if (recievers == null || recievers.size() == 0) {
 
@@ -251,6 +269,13 @@ public class ClientController {
     }
 
     public void sendPic(String text, ImageIcon icon) {
+
+        try {
+            outputStream.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(text, icon), user));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void addFriend(String text) {

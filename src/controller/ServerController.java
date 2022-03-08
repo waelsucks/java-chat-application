@@ -263,8 +263,6 @@ public class ServerController {
 
             // Here we queue messages for a user's return
 
-            // ClientHandler[] handlers = (ClientHandler[]) pcs.getPropertyChangeListeners();
-
             boolean isUserOnline = Arrays.asList(pcs.getPropertyChangeListeners()).stream().anyMatch(o -> ((ClientHandler) o).getUsername().equals(username));
             
             if (!isUserOnline) {
@@ -286,20 +284,6 @@ public class ServerController {
             if (message.getRecieverID().contains(handler.getUsername())) {
                 pcl.propertyChange(new PropertyChangeEvent(this, "message", null, tp));
             }
-
-            // if (message.getRecieverID().contains(handler.getUsername())) {
-            //     pcl.propertyChange(new PropertyChangeEvent(this, "message", null, tp));
-            // } else {
-
-            //     // This is where we handle the user not being online.
-
-            //     if (messageQueue.get(handler.getUsername()) == null) {
-            //         messageQueue.put(handler.getUsername(), new ArrayList<Message>());
-            //     }
-
-            //     messageQueue.get(handler.getUsername()).add(message);
-
-            // }
 
         }
 

@@ -54,7 +54,7 @@ public class ClientGUI extends JPanel implements KeyListener {
                 }
             }
 
-            controller.sendMessage(getMessageBox().getText(), recievers);
+            controller.sendMessage(getMessageBox().getText(), null, recievers);
 
             messageBox.setText(null);
 
@@ -101,7 +101,8 @@ public class ClientGUI extends JPanel implements KeyListener {
             } else {
                 icon = null;
             }
-            controller.sendPic(getMessageBox().getText(), icon);
+            // controller.sendPic(getMessageBox().getText(), icon);
+            controller.sendMessage(getMessageBox().getText(), icon, recievers);
         });
 
     }
@@ -229,7 +230,6 @@ public class ClientGUI extends JPanel implements KeyListener {
 
         // FOR DESELECTING
 
-        
 
         // ----------------
 
@@ -363,7 +363,7 @@ public class ClientGUI extends JPanel implements KeyListener {
                 }
             }
 
-            controller.sendMessage(getMessageBox().getText(), recievers);
+            controller.sendMessage(getMessageBox().getText(), null, recievers);
 
             messageBox.setText(null);
             messageBox.resetKeyboardActions();
