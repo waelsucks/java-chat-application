@@ -141,6 +141,26 @@ public class ServerController {
             for (String id : message.getRecieverID()) {
                 string.append(">> " + getUser(id).getName() + "\n");
             }
+        }
+
+        if (tp.getType() == PackageType.SIGN_UP) {
+            
+            string.append(String.format("[%s]\n", new Date()));
+            string.append(tp.getUser().getName() + " registered!\n");
+
+        }
+
+        if (tp.getType() == PackageType.CLIENT_CONNECT) {
+            
+            string.append(String.format("[%s]\n", new Date()));
+            string.append(tp.getUser().getName() + " connected!\n");
+
+        }
+
+        if (tp.getType() == PackageType.CLIENT_DISCONNECT) {
+            
+            string.append(String.format("[%s]\n", new Date()));
+            string.append(tp.getUser().getName() + " disconnected!\n");
 
         }
 
