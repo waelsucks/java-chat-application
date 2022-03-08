@@ -103,20 +103,20 @@ public class ServerGUI extends JPanel {
     }
 
     private void createComponents() {
-        setPreferredSize(new Dimension(500, 370));
+        setPreferredSize(new Dimension(580, 570));
         setLayout(new BorderLayout());
 
         mainPanel = new JPanel();
-        mainPanel.setPreferredSize(new Dimension(500, 370));
+        mainPanel.setPreferredSize(new Dimension(580, 570));
         mainPanel.setBackground(new Color(0, 0, 0));
         mainPanel.setForeground(new Color(50, 205, 50));
 
         rightPnl = new JPanel();
         rightPnl.setBackground(new Color(0, 0, 0));
-        rightPnl.setPreferredSize(new Dimension(480, 380));
+        rightPnl.setPreferredSize(new Dimension(560, 580));
 
         trafficLabel = new JLabel("Traffic");
-        trafficLabel.setFont(new Font("Monospaced", Font.BOLD, 13));
+        trafficLabel.setFont(new Font("Monospaced", Font.BOLD, 12));
         trafficLabel.setForeground(new Color(50, 205, 50));
 
         trafficBox = new JTextArea();
@@ -125,28 +125,28 @@ public class ServerGUI extends JPanel {
         // trafficBox.setWrapStyleWord(true);
         trafficBox.setBackground(new Color(0, 0, 0));
         trafficBox.setForeground(new Color(50, 205, 50));
-        trafficBox.setFont(new Font("Monospaced", Font.BOLD, 13));
+        trafficBox.setFont(new Font("Monospaced", Font.BOLD, 12));
 
         trafficPane = new JScrollPane(trafficBox);
         trafficPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         trafficPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        trafficPane.setPreferredSize(new Dimension(480, 240));
+        trafficPane.setPreferredSize(new Dimension(560, 440));
 
-        specificTrafficLabel = new JLabel("Specific traffic: ");
+        specificTrafficLabel = new JLabel("Interval: ");
         specificTrafficLabel.setFont(new Font("Monospaced", Font.BOLD, 13));
         specificTrafficLabel.setForeground(new Color(50, 205, 50));
 
         trafficStart = new JTextField("Tue, Mar 08 2022 22:26:03");
-        trafficStart.setPreferredSize(new Dimension(160, 30));
+        trafficStart.setPreferredSize(new Dimension(210, 30));
         trafficStart.setBackground(new Color(0, 0, 0));
         trafficStart.setForeground(new Color(50, 205, 50));
-        trafficStart.setFont(new Font("Monospaced", Font.BOLD, 13));
+        trafficStart.setFont(new Font("Monospaced", Font.BOLD, 12));
 
         trafficStop = new JTextField("Tue, Mar 08 2022 22:26:03");
-        trafficStop.setPreferredSize(new Dimension(160, 30));
+        trafficStop.setPreferredSize(new Dimension(210, 30));
         trafficStop.setBackground(new Color(0, 0, 0));
         trafficStop.setForeground(new Color(50, 205, 50));
-        trafficStop.setFont(new Font("Monospaced", Font.BOLD, 13));
+        trafficStop.setFont(new Font("Monospaced", Font.BOLD, 12));
 
         show = new JButton("Show");
         show.setPreferredSize(new Dimension(160, 30));
