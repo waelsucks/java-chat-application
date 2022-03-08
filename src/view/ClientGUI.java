@@ -59,23 +59,22 @@ public class ClientGUI extends JPanel implements KeyListener{
             }
         });
         getPic().addActionListener(e -> {
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setMultiSelectionEnabled(false);
-            if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            
-            //Scaling the picure!!
-            ImageIcon image = new ImageIcon(file.getAbsolutePath());
-            java.awt.Image newimg = image.getImage().getScaledInstance(70,70, java.awt.Image.SCALE_SMOOTH);
-            icon = new ImageIcon(newimg);
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Upload a picture! (png/jpg)");
 
-            try {
-                controller.sendPic(getMessageBox().getText(),icon);
-            } catch (Exception e1) {
-                e1.printStackTrace();
-                System.out.println("Picture Error.");            
+            ImageIcon icon;
+
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                File file = chooser.getSelectedFile();
+                ImageIcon image = new ImageIcon(file.getAbsolutePath());
+
+                java.awt.Image newimg = image.getImage().getScaledInstance(90,90, java.awt.Image.SCALE_SMOOTH);        
+                icon = new ImageIcon(newimg);
+            } 
+            else {
+                icon = null;
             }
-            }
+            controller.sendPic(getMessageBox().getText(), icon);
         });
 
     }
@@ -324,15 +323,13 @@ public class ClientGUI extends JPanel implements KeyListener{
     public ImageIcon chooseImage() {
 
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Upload a picture! (png/jpg)");
+        chooser.setDialogTitle("Upload a profile picture! (png/jpg)");
 
         ImageIcon icon;
 
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
-            ImageIcon image = new ImageIcon(file.getAbsolutePath());
-            java.awt.Image newimg = image.getImage().getScaledInstance(90,90, java.awt.Image.SCALE_SMOOTH);        
-            icon = new ImageIcon(newimg);
+            icon = new ImageIcon(file.getAbsolutePath());
         } 
         else {
             icon = null;
