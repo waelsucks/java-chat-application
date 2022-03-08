@@ -299,4 +299,20 @@ public class ServerController {
         this.messageQueue = messageQueue;
     }
 
+    public ArrayList<TrafficPackage> getEventsBetween(Date from, Date to) {
+
+        ArrayList<TrafficPackage> sorted = new ArrayList<TrafficPackage>();
+
+        for (TrafficPackage event : events) {
+            
+            if ((event.getDate().compareTo(from) >= 0) && (event.getDate().compareTo(to) <= 0)) {
+                sorted.add(event);
+            }
+
+        }
+
+        return sorted;
+
+    }
+
 }
