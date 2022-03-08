@@ -324,17 +324,20 @@ public class ClientGUI extends JPanel implements KeyListener{
     public ImageIcon chooseImage() {
 
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Choose your profile picture! (png/jpg)");
+        chooser.setDialogTitle("Upload a picture! (png/jpg)");
 
-        ImageIcon image;
+        ImageIcon icon;
 
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
-            image = new ImageIcon(file.getAbsolutePath());
-        } else {
-            image = null;
+            ImageIcon image = new ImageIcon(file.getAbsolutePath());
+            java.awt.Image newimg = image.getImage().getScaledInstance(90,90, java.awt.Image.SCALE_SMOOTH);        
+            icon = new ImageIcon(newimg);
+        } 
+        else {
+            icon = null;
         }
 
-        return image;
+        return icon;
     }
 }
