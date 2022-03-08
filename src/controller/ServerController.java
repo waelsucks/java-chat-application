@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -35,6 +36,8 @@ public class ServerController {
     private ServerGUI view;
     private ArrayList<TrafficPackage> events;
 
+    private HashMap<String, ArrayList<Message>> messageQueue;
+
     public ServerController(int port) {
 
         System.out.println("Starting server...");
@@ -43,6 +46,7 @@ public class ServerController {
 
         view = new ServerGUI(this);
         events = new ArrayList<TrafficPackage>(); // This will later be replaced by a file containing events (?)
+        messageQueue = new HashMap<String, ArrayList<Message>>();
 
         users = readUsers();
 
@@ -69,7 +73,7 @@ public class ServerController {
 
     private HashMap<String, User> readUsers() {
 
-        HashMap<String, User> users = null;
+        users = null;
 
         try (ObjectInputStream ois = new ObjectInputStream(
                 new BufferedInputStream(new FileInputStream("files/Users.chat")))) {
@@ -99,11 +103,7 @@ public class ServerController {
 
         User user = null;
 
-        readUsers();
-
-        synchronized (users) {
-            user = users.get(username);
-        }
+        user = users.get(username);
 
         return user;
     }
@@ -116,6 +116,8 @@ public class ServerController {
                 new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
 
             ous.writeObject(users);
+
+            System.out.println("Made changes to users file...");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -144,29 +146,40 @@ public class ServerController {
         }
 
         if (tp.getType() == PackageType.SIGN_UP) {
-            
+
             string.append(String.format("[%s]\n", new Date()));
             string.append(tp.getUser().getName() + " registered!\n");
+
+            sendMessage(
+                    new TrafficPackage(PackageType.MESSAGE, new Date(), new Message("Registered!", null),
+                            tp.getUser()));
 
         }
 
         if (tp.getType() == PackageType.CLIENT_CONNECT) {
-            
+
             string.append(String.format("[%s]\n", new Date()));
             string.append(tp.getUser().getName() + " connected!\n");
+
+            sendMessage(
+                    new TrafficPackage(PackageType.MESSAGE, new Date(), new Message("Connected!", null), tp.getUser()));
 
         }
 
         if (tp.getType() == PackageType.CLIENT_DISCONNECT) {
-            
+
             string.append(String.format("[%s]\n", new Date()));
             string.append(tp.getUser().getName() + " disconnected!\n");
+
+            sendMessage(
+                    new TrafficPackage(PackageType.MESSAGE, new Date(), new Message("Disconnected!", null),
+                            tp.getUser()));
 
         }
 
         // view.getTrafficBox()
-        //         .append(String.format("[%s] >> %s \n", tp.getDate(),
-        //                 tp.getType()));
+        // .append(String.format("[%s] >> %s \n", tp.getDate(),
+        // tp.getType()));
 
         view.getTrafficBox().append(string.toString() + "\n____________<3_____________\n");
 
@@ -232,6 +245,40 @@ public class ServerController {
 
         Message message = (Message) tp.getEvent();
 
+        if (message.getRecieverID().isEmpty()) {
+
+            // Add all online users as recievers incase recievers is empty. ( public message
+            // )
+
+            for (PropertyChangeListener pcl : pcs.getPropertyChangeListeners()) {
+
+                ClientHandler handler = (ClientHandler) pcl;
+
+                message.getRecieverID().add(handler.getUsername());
+
+            }
+        }
+
+        for (String username : message.getRecieverID()) {
+
+            // Here we queue messages for a user's return
+
+            // ClientHandler[] handlers = (ClientHandler[]) pcs.getPropertyChangeListeners();
+
+            boolean isUserOnline = Arrays.asList(pcs.getPropertyChangeListeners()).stream().anyMatch(o -> ((ClientHandler) o).getUsername().equals(username));
+            
+            if (!isUserOnline) {
+                
+                if (messageQueue.get(username) == null) {
+                    messageQueue.put(username, new ArrayList<Message>());
+                }
+
+                messageQueue.get(username).add(message);
+
+            }
+
+        }
+
         for (PropertyChangeListener pcl : pcs.getPropertyChangeListeners()) {
 
             ClientHandler handler = (ClientHandler) pcl;
@@ -240,10 +287,32 @@ public class ServerController {
                 pcl.propertyChange(new PropertyChangeEvent(this, "message", null, tp));
             }
 
+            // if (message.getRecieverID().contains(handler.getUsername())) {
+            //     pcl.propertyChange(new PropertyChangeEvent(this, "message", null, tp));
+            // } else {
+
+            //     // This is where we handle the user not being online.
+
+            //     if (messageQueue.get(handler.getUsername()) == null) {
+            //         messageQueue.put(handler.getUsername(), new ArrayList<Message>());
+            //     }
+
+            //     messageQueue.get(handler.getUsername()).add(message);
+
+            // }
+
         }
 
         logEvent(tp);
 
+    }
+
+    public HashMap<String, ArrayList<Message>> getMessageQueue() {
+        return this.messageQueue;
+    }
+
+    public void setMessageQueue(HashMap<String, ArrayList<Message>> messageQueue) {
+        this.messageQueue = messageQueue;
     }
 
 }

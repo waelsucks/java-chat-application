@@ -40,7 +40,6 @@ public class ClientController {
         this.address = address;
         this.port = port;
         this.view = new ClientGUI(this);
-        
 
         connect();
 
@@ -88,19 +87,24 @@ public class ClientController {
 
                         case USER:
 
-                            user = (User) tp.getEvent();
+                            setUser((User) tp.getEvent());
 
                             JOptionPane.showMessageDialog(null, "Welcome " + user.getName());
 
                             outputStream
-                                    .writeObject(new TrafficPackage(PackageType.USER_ONLINE, new Date(), null, user));
+                                    .writeObject(new TrafficPackage(PackageType.USER_ONLINE, new Date(), null, getUser()));
+
+                            User beep = getUser();
+
+                            view.setContactBoxValue(getUser().getFriends());
 
                             break;
 
                         case GET_ONLINE_USERS:
 
                             view.setUserBoxValue((UserList) tp.getEvent());
-                            usersOnline = (UserList)tp.getEvent();
+
+                            usersOnline = (UserList) tp.getEvent();
 
                             break;
 
@@ -114,8 +118,17 @@ public class ClientController {
 
                             StyledDocument document = (StyledDocument) view.getChatBox().getDocument();
                             document.insertString(document.getLength(),
-                                    String.format("[%s] >> %s\n", tp.getUser().getName(), tp.getEvent().getMessage()), null);
+                                    String.format("[%s] >> %s\n", tp.getUser().getName(), tp.getEvent().getMessage()),
+                                    null);
                             view.getChatBox().setDocument(document);
+
+                            break;
+
+                        case ADD_CONTACT:
+
+                            setUser((User) tp.getEvent());
+
+                            view.setContactBoxValue(getUser().getFriends());
 
                             break;
 
@@ -167,7 +180,7 @@ public class ClientController {
         profile.setProfilePic(toShow.getIconFile());
         profile.setUsername(toShow.getUserID());
 
-        if (toShow.getStatus() || toShow.getUserID().equals(user.getUserID())) {
+        if (toShow.getStatus()) {
             profile.setStatus("Online");
         } else {
             profile.setStatus("Offline");
@@ -190,7 +203,7 @@ public class ClientController {
 
     }
 
-    public void sendMessage(String text) {
+    public void sendMessage(String text, ArrayList<String> recievers) {
 
         // If it is a public message...
 
@@ -198,14 +211,20 @@ public class ClientController {
 
         message.setTimeSent(new Date());
         message.setSenderID(user.getUserID());
-        
-        boolean publicMessage = true;
 
-        if (publicMessage) {
-            
+        if (recievers == null || recievers.size() == 0) {
+
             for (User userOnline : usersOnline) {
                 message.getRecieverID().add(userOnline.getUserID());
             }
+
+        } else {
+
+            for (String string : recievers) {
+                message.getRecieverID().add(string);
+            }
+
+            message.getRecieverID().add(getUser().getUserID());
 
         }
 
@@ -235,6 +254,77 @@ public class ClientController {
     }
 
     public void addFriend(String text) {
+
+        try {
+            outputStream.writeObject(new TrafficPackage(PackageType.ADD_CONTACT, null, new Message(text, null), user));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public ObjectInputStream getInputStream() {
+        return this.inputStream;
+    }
+
+    public void setInputStream(ObjectInputStream inputStream) {
+        this.inputStream = inputStream;
+    }
+
+    public ObjectOutputStream getOutputStream() {
+        return this.outputStream;
+    }
+
+    public void setOutputStream(ObjectOutputStream outputStream) {
+        this.outputStream = outputStream;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getPort() {
+        return this.port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public Socket getSocket() {
+        return this.socket;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
+    public ClientGUI getView() {
+        return this.view;
+    }
+
+    public void setView(ClientGUI view) {
+        this.view = view;
+    }
+
+    public User getUser() {
+        return this.user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public UserList getUsersOnline() {
+        return this.usersOnline;
+    }
+
+    public void setUsersOnline(UserList usersOnline) {
+        this.usersOnline = usersOnline;
     }
 
 }

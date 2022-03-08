@@ -10,6 +10,7 @@ public class UserGUI extends JPanel {
 	private JButton addFriend;
 	private JPanel mainPanel, rightPnl;
     private ImageIcon icon = null;
+	private String username = null;
 
 	public static void main(String[] args) {
 		//UserGUI lgui = new UserGUI();
@@ -17,7 +18,7 @@ public class UserGUI extends JPanel {
 
 	private void createActionEvents() {
 	    getAddFriend().addActionListener(l -> {
-			controller.addFriend(usernameLbl.getText());
+			controller.addFriend(username);
 		});
 	}
 
@@ -80,6 +81,7 @@ public class UserGUI extends JPanel {
 
 	public void setUsername(String text) {
 		usernameLbl.setText("Username: " + text);
+		username = text;
 	}
 	
 	public void setName(String text) {

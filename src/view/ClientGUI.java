@@ -1,15 +1,21 @@
-package view; 
+package view;
 
 import javax.swing.*;
+import javax.swing.event.MouseInputAdapter;
+import javax.swing.event.MouseInputListener;
+
+import org.w3c.dom.events.MouseEvent;
+
 import controller.ClientController;
 import model.pojo.User;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 
-public class ClientGUI extends JPanel implements KeyListener{
+public class ClientGUI extends JPanel implements KeyListener {
 
     private ClientController controller;
     private JLabel userLabel, contactsLabel;
@@ -21,15 +27,37 @@ public class ClientGUI extends JPanel implements KeyListener{
     private JList<String> userBox, contactsBox;
     private JScrollPane chatPane, messagePane, userPane, contactsPane;
     private ArrayList<User> users = new ArrayList<User>();
-    private ArrayList<User> friends = new ArrayList<User>();;
+    private ArrayList<String> friends = new ArrayList<String>();;
+    private ArrayList<String> recievers = new ArrayList<String>();
 
     // public static void main(String[] args) {
     // new MainPanel();
     // }
 
     public void createActionEvents() {
+
+        
+
         getSend().addActionListener(l -> {
-            controller.sendMessage(getMessageBox().getText());
+
+            recievers.clear();
+
+            if (!userBox.isSelectionEmpty()) {
+                for (int i : userBox.getSelectedIndices()) {
+                    recievers.add(users.get(i).getUserID());
+                }
+            }
+
+            if (!contactsBox.isSelectionEmpty()) {
+                for (String string : contactsBox.getSelectedValuesList()) {
+                    recievers.add(string);
+                }
+            }
+
+            controller.sendMessage(getMessageBox().getText(), recievers);
+
+            messageBox.setText(null);
+
         });
         getConnect().addActionListener(l -> {
             controller.connect();
@@ -52,7 +80,7 @@ public class ClientGUI extends JPanel implements KeyListener{
 
             if (userBox.getSelectedIndex() == -1) {
                 controller.getProfile(
-                        friends.get(contactsBox.getSelectedIndex()).getUserID());
+                        friends.get(contactsBox.getSelectedIndex()));
             } else {
                 controller.getProfile(
                         users.get(userBox.getSelectedIndex()).getUserID());
@@ -68,10 +96,9 @@ public class ClientGUI extends JPanel implements KeyListener{
                 File file = chooser.getSelectedFile();
                 ImageIcon image = new ImageIcon(file.getAbsolutePath());
 
-                java.awt.Image newimg = image.getImage().getScaledInstance(90,90, java.awt.Image.SCALE_SMOOTH);        
+                java.awt.Image newimg = image.getImage().getScaledInstance(90, 90, java.awt.Image.SCALE_SMOOTH);
                 icon = new ImageIcon(newimg);
-            } 
-            else {
+            } else {
                 icon = null;
             }
             controller.sendPic(getMessageBox().getText(), icon);
@@ -200,6 +227,12 @@ public class ClientGUI extends JPanel implements KeyListener{
         btnPnl.setBackground(new Color(0, 0, 0));
         btnPnl.setPreferredSize(new Dimension(500, 40));
 
+        // FOR DESELECTING
+
+        
+
+        // ----------------
+
         btnPnl.add(send);
         btnPnl.add(connect);
         btnPnl.add(disconnect);
@@ -282,42 +315,66 @@ public class ClientGUI extends JPanel implements KeyListener{
         return pic;
     }
 
-    public void setContactBoxValue(ArrayList<User> friends) {
+    public void setContactBoxValue(ArrayList<String> friendsParam) {
 
-        this.friends = friends;
+        // this.friends = friends;
 
-        String[] toView = new String[friends.size()];
+        // String[] toView = new String[friends.size()];
 
-        for (int i = 0; i < toView.length; i++) {
+        // for (int i = 0; i < toView.length; i++) {
 
-            toView[i] = friends.get(i).getName();
+        // toView[i] = friends.get(i).getName();
 
+        // }
+
+        friends = friendsParam;
+        String[] list = new String[friendsParam.size()];
+
+        for (int i = 0; i < list.length; i++) {
+            list[i] = friendsParam.get(i);
         }
 
-        contactsBox.setListData(toView);
+        contactsBox.setListData(list);
 
     }
 
     @Override
     public void keyTyped(KeyEvent e) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            controller.sendMessage(getMessageBox().getText()); 
-            messageBox.setText(null); 
+
+
+            recievers.clear();
+
+            if (!userBox.isSelectionEmpty()) {
+                for (int i : userBox.getSelectedIndices()) {
+                    recievers.add(users.get(i).getUserID());
+                }
+            }
+
+            if (!contactsBox.isSelectionEmpty()) {
+                for (String string : contactsBox.getSelectedValuesList()) {
+                    recievers.add(string);
+                }
+            }
+
+            controller.sendMessage(getMessageBox().getText(), recievers);
+
+            messageBox.setText(null);
             messageBox.resetKeyboardActions();
             messageBox.setCursor(Cursor.getPredefinedCursor(-1));
-        }        
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
         // TODO Auto-generated method stub
-        
+
     }
 
     public ImageIcon chooseImage() {
@@ -330,8 +387,7 @@ public class ClientGUI extends JPanel implements KeyListener{
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
             icon = new ImageIcon(file.getAbsolutePath());
-        } 
-        else {
+        } else {
             icon = null;
         }
 

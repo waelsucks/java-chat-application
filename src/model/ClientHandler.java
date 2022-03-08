@@ -50,8 +50,9 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
             controller.logEvent(
                     new TrafficPackage(PackageType.CLIENT_DISCONNECT, new Date(), null, controller.getUser(username)));
             controller.userStatus(username, false);
+            controller.getPcs().removePropertyChangeListener(this);
 
-            e.printStackTrace();
+            // e.printStackTrace();
         }
 
     }
@@ -97,8 +98,20 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
                             new TrafficPackage(PackageType.CLIENT_CONNECT, new Date(), null,
                                     controller.getUser(username)));
 
-                }
+                    if (controller.getMessageQueue().containsKey(username)) {
+                        for (Message missedMessage : controller.getMessageQueue().get(username)) {
+                            outputStream.writeObject(
+                                    new TrafficPackage(PackageType.MESSAGE, new Date(), missedMessage,
+                                            controller.getUser(
+                                                    missedMessage.getSenderID())));
+                        }
 
+                        controller.getMessageQueue().get(username).clear();
+
+                    }
+
+
+                }
                 break;
 
             case GET_ONLINE_USERS:
@@ -124,6 +137,8 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
             case GET_USER:
 
                 User toSend = controller.getUser(tp.getEvent().getMessage());
+                // User toSend = new User("Tessa Testar", UserGroup.ADMIN, "beep", null);
+                // toSend.setStatus(true);
 
                 outputStream.writeObject(new TrafficPackage(PackageType.GET_USER, null, toSend, null));
 
@@ -132,6 +147,21 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
             case MESSAGE:
 
                 controller.sendMessage(tp);
+                break;
+
+            case ADD_CONTACT:
+
+                if (!controller.getUser(username).getFriends().contains(tp.getEvent().getMessage())) {
+
+                    controller.getUser(username).addFriend(tp.getEvent().getMessage());
+                    controller.updateUsers();
+
+                    User beep = controller.getUser(username);
+
+                    outputStream.writeObject(new TrafficPackage(PackageType.ADD_CONTACT, null, beep, beep));
+
+                }
+
                 break;
 
             default:
