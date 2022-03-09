@@ -58,6 +58,9 @@ public class ClientGUI extends JPanel implements KeyListener {
 
             messageBox.setText(null);
 
+            userBox.clearSelection();
+            contactsBox.clearSelection();
+
         });
         getConnect().addActionListener(l -> {
             controller.connect();
@@ -66,6 +69,10 @@ public class ClientGUI extends JPanel implements KeyListener {
             getSend().setEnabled(true);
             getShowProfile().setEnabled(true);
             getPic().setEnabled(true);
+
+            userBox.clearSelection();
+            contactsBox.clearSelection();
+
         });
         getDisconnect().addActionListener(e -> {
             controller.disconnect();
@@ -74,6 +81,9 @@ public class ClientGUI extends JPanel implements KeyListener {
             getSend().setEnabled(false);
             getShowProfile().setEnabled(false);
             getPic().setEnabled(false);
+
+            userBox.clearSelection();
+            contactsBox.clearSelection();
 
         });
         getShowProfile().addActionListener(e -> {
@@ -85,6 +95,10 @@ public class ClientGUI extends JPanel implements KeyListener {
                 controller.getProfile(
                         users.get(userBox.getSelectedIndex()).getUserID());
             }
+
+            userBox.clearSelection();
+            contactsBox.clearSelection();
+
         });
         getPic().addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
@@ -348,18 +362,21 @@ public class ClientGUI extends JPanel implements KeyListener {
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
-
             recievers.clear();
 
             if (!userBox.isSelectionEmpty()) {
                 for (int i : userBox.getSelectedIndices()) {
                     recievers.add(users.get(i).getUserID());
+                    userBox.clearSelection();
+
                 }
             }
 
             if (!contactsBox.isSelectionEmpty()) {
                 for (String string : contactsBox.getSelectedValuesList()) {
                     recievers.add(string);
+                    contactsBox.clearSelection();
+
                 }
             }
 
@@ -368,6 +385,7 @@ public class ClientGUI extends JPanel implements KeyListener {
             messageBox.setText(null);
             messageBox.resetKeyboardActions();
             messageBox.setCursor(Cursor.getPredefinedCursor(-1));
+
         }
     }
 
