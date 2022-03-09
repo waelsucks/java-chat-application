@@ -19,7 +19,7 @@ public class ClientGUI extends JPanel implements KeyListener {
 
     private ClientController controller;
     private JLabel userLabel, contactsLabel;
-    private JButton quit, send, pic, connect, disconnect, showProfile;
+    private JButton quit, send, pic, connect, disconnect, showProfile, deselect;
     private JPanel mainPanel, leftPnl, centerPnl, btnPnl;
     private JTextArea messageBox;
     private JTextPane chatBox;
@@ -30,13 +30,13 @@ public class ClientGUI extends JPanel implements KeyListener {
     private ArrayList<String> friends = new ArrayList<String>();;
     private ArrayList<String> recievers = new ArrayList<String>();
 
-    // public static void main(String[] args) {
-    // new MainPanel();
-    // }
-
     public void createActionEvents() {
+        getDeselect().addActionListener(l -> { 
 
-        
+            userBox.clearSelection();
+            contactsBox.clearSelection();
+
+        });
 
         getSend().addActionListener(l -> {
 
@@ -182,11 +182,18 @@ public class ClientGUI extends JPanel implements KeyListener {
         contactsPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         contactsPane.setPreferredSize(new Dimension(160, 200));
 
+        deselect = new JButton("Deselect all");
+        deselect.setPreferredSize(new Dimension(160, 20));
+        deselect.setBackground(new Color(0, 0, 0));
+        deselect.setForeground(new Color(50, 205, 50));
+        deselect.setFont(new Font("Monospaced", Font.BOLD, 10));
+
         leftPnl.add(userLabel);
         leftPnl.add(userPane);
         leftPnl.add(showProfile);
         leftPnl.add(contactsLabel);
         leftPnl.add(contactsPane);
+        leftPnl.add(deselect);
 
         ////////////////////////////////////////////////
         centerPnl = new JPanel();
@@ -325,6 +332,10 @@ public class ClientGUI extends JPanel implements KeyListener {
         return disconnect;
     }
 
+    public JButton getDeselect() {
+        return deselect;
+    }
+
     public JButton getPic() {
         return pic;
     }
@@ -385,8 +396,8 @@ public class ClientGUI extends JPanel implements KeyListener {
             messageBox.setText(null);
             messageBox.resetKeyboardActions();
             messageBox.setCursor(Cursor.getPredefinedCursor(-1));
-
         }
+
     }
 
     @Override
