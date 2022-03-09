@@ -253,6 +253,7 @@ public class ClientController {
     }
 
     public void disconnect() {
+        System.exit(0);
     }
 
     public void getProfile(String userID) {

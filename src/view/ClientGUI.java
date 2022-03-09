@@ -19,7 +19,7 @@ public class ClientGUI extends JPanel implements KeyListener {
 
     private ClientController controller;
     private JLabel userLabel, contactsLabel;
-    private JButton quit, send, pic, connect, disconnect, showProfile, deselect;
+    private JButton quit, send, pic, disconnect, showProfile, deselect;
     private JPanel mainPanel, leftPnl, centerPnl, btnPnl;
     private JTextArea messageBox;
     private JTextPane chatBox;
@@ -62,22 +62,10 @@ public class ClientGUI extends JPanel implements KeyListener {
             contactsBox.clearSelection();
 
         });
-        getConnect().addActionListener(l -> {
-            controller.connect();
-            getConnect().setEnabled(false);
-            getDisconnect().setEnabled(true);
-            getSend().setEnabled(true);
-            getShowProfile().setEnabled(true);
-            getPic().setEnabled(true);
-
-            userBox.clearSelection();
-            contactsBox.clearSelection();
-
-        });
+        
         getDisconnect().addActionListener(e -> {
             controller.disconnect();
             getDisconnect().setEnabled(false);
-            getConnect().setEnabled(true);
             getSend().setEnabled(false);
             getShowProfile().setEnabled(false);
             getPic().setEnabled(false);
@@ -130,7 +118,6 @@ public class ClientGUI extends JPanel implements KeyListener {
         frame.pack();
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        getConnect().setEnabled(false);
         createActionEvents();
     }
 
@@ -222,42 +209,30 @@ public class ClientGUI extends JPanel implements KeyListener {
         messageBox.addKeyListener(this);
 
         send = new JButton("Send");
-        send.setPreferredSize(new Dimension(120, 30));
+        send.setPreferredSize(new Dimension(205, 30));
         send.setBackground(new Color(0, 0, 0));
         send.setForeground(new Color(50, 205, 50));
         send.setFont(new Font("Monospaced", Font.BOLD, 13));
 
-        connect = new JButton("Connect");
-        connect.setPreferredSize(new Dimension(120, 30));
-        connect.setBackground(new Color(0, 0, 0));
-        connect.setForeground(new Color(50, 205, 50));
-        connect.setFont(new Font("Monospaced", Font.BOLD, 13));
-
-        disconnect = new JButton("Disconnect");
-        disconnect.setPreferredSize(new Dimension(120, 30));
-        disconnect.setBackground(new Color(0, 0, 0));
-        disconnect.setForeground(new Color(50, 205, 50));
-        disconnect.setFont(new Font("Monospaced", Font.BOLD, 13));
-
         pic = new JButton("Send Pic");
-        pic.setPreferredSize(new Dimension(120, 30));
+        pic.setPreferredSize(new Dimension(140, 30));
         pic.setBackground(new Color(0, 0, 0));
         pic.setForeground(new Color(50, 205, 50));
         pic.setFont(new Font("Monospaced", Font.BOLD, 13));
+
+        disconnect = new JButton("Disconnect");
+        disconnect.setPreferredSize(new Dimension(140, 30));
+        disconnect.setBackground(new Color(0, 0, 0));
+        disconnect.setForeground(new Color(50, 205, 50));
+        disconnect.setFont(new Font("Monospaced", Font.BOLD, 13));
 
         btnPnl = new JPanel();
         btnPnl.setBackground(new Color(0, 0, 0));
         btnPnl.setPreferredSize(new Dimension(500, 40));
 
-        // FOR DESELECTING
-
-
-        // ----------------
-
         btnPnl.add(send);
-        btnPnl.add(connect);
-        btnPnl.add(disconnect);
         btnPnl.add(pic);
+        btnPnl.add(disconnect);
 
         centerPnl.add(chatPane);
         centerPnl.add(messagePane);
@@ -318,10 +293,6 @@ public class ClientGUI extends JPanel implements KeyListener {
 
     public JButton getQuit() {
         return quit;
-    }
-
-    public JButton getConnect() {
-        return connect;
     }
 
     public JButton getShowProfile() {
