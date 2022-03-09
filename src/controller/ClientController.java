@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -96,8 +95,6 @@ public class ClientController {
 
                             outputStream
                                     .writeObject(new TrafficPackage(PackageType.USER_ONLINE, new Date(), null, getUser()));
-
-                            User beep = getUser();
 
                             view.setContactBoxValue(getUser().getFriends());
 

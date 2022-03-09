@@ -20,7 +20,6 @@ import javax.swing.ImageIcon;
 
 import model.ClientHandler;
 import model.pojo.Message;
-import model.pojo.PackageInterface;
 import model.pojo.PackageType;
 import model.pojo.TrafficPackage;
 import model.pojo.User;
@@ -49,6 +48,7 @@ public class ServerController {
         messageQueue = new HashMap<String, ArrayList<Message>>();
 
         users = readUsers();
+        events = readEvents();
 
         try {
 
@@ -69,6 +69,23 @@ public class ServerController {
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
+    }
+
+    private ArrayList<TrafficPackage> readEvents() {
+
+        events = null;
+
+        try (ObjectInputStream ois = new ObjectInputStream(
+                new BufferedInputStream(new FileInputStream("files/Events.chat")))) {
+
+            events = (ArrayList<TrafficPackage>) ois.readObject();
+
+        } catch (Exception e) {
+            events = new ArrayList<TrafficPackage>();
+            System.out.println("Resetting events...");
+        }
+
+        return events;
     }
 
     private HashMap<String, User> readUsers() {
@@ -127,9 +144,30 @@ public class ServerController {
 
     }
 
+    public void updateEvents() {
+
+        // Writes the current users hashmap to the Users.chat file
+
+        try (ObjectOutputStream ous = new ObjectOutputStream(
+                new BufferedOutputStream(new FileOutputStream("files/Events.chat")))) {
+
+            ous.writeObject(events);
+
+            System.out.println("Made changes to events file...");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        readEvents();
+
+    }
+
     public void logEvent(TrafficPackage tp) {
 
         events.add(tp);
+
+        updateEvents();
 
         StringBuilder string = new StringBuilder();
 
@@ -176,10 +214,6 @@ public class ServerController {
                             tp.getUser()));
 
         }
-
-        // view.getTrafficBox()
-        // .append(String.format("[%s] >> %s \n", tp.getDate(),
-        // tp.getType()));
 
         view.getTrafficBox().append(string.toString() + "\n____________<3_____________\n");
 
@@ -263,10 +297,11 @@ public class ServerController {
 
             // Here we queue messages for a user's return
 
-            boolean isUserOnline = Arrays.asList(pcs.getPropertyChangeListeners()).stream().anyMatch(o -> ((ClientHandler) o).getUsername().equals(username));
-            
+            boolean isUserOnline = Arrays.asList(pcs.getPropertyChangeListeners()).stream()
+                    .anyMatch(o -> ((ClientHandler) o).getUsername().equals(username));
+
             if (!isUserOnline) {
-                
+
                 if (messageQueue.get(username) == null) {
                     messageQueue.put(username, new ArrayList<Message>());
                 }
@@ -304,7 +339,7 @@ public class ServerController {
         ArrayList<TrafficPackage> sorted = new ArrayList<TrafficPackage>();
 
         for (TrafficPackage event : events) {
-            
+
             if ((event.getDate().compareTo(from) >= 0) && (event.getDate().compareTo(to) <= 0)) {
                 sorted.add(event);
             }

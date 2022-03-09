@@ -98,8 +98,17 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
                             new TrafficPackage(PackageType.CLIENT_CONNECT, new Date(), null,
                                     controller.getUser(username)));
 
+                    // Here we check for messages in the queue for this user.
+
                     if (controller.getMessageQueue().containsKey(username)) {
                         for (Message missedMessage : controller.getMessageQueue().get(username)) {
+
+                            missedMessage.setTimeRecieved(new Date());
+
+                            missedMessage.setMessage(
+                                String.format("%s\n^-- [Sent at: %s]", missedMessage.getMessage(), missedMessage.getTimeSent())
+                            );
+
                             outputStream.writeObject(
                                     new TrafficPackage(PackageType.MESSAGE, new Date(), missedMessage,
                                             controller.getUser(
@@ -189,7 +198,13 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
             case "message":
 
                 try {
-                    outputStream.writeObject(evt.getNewValue());
+
+                    TrafficPackage tp = (TrafficPackage) evt.getNewValue();
+                    Message message = (Message) tp.getEvent();
+
+                    message.setTimeRecieved(new Date());
+                    outputStream.writeObject(tp);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
