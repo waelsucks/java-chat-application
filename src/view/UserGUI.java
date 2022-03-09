@@ -12,10 +12,6 @@ public class UserGUI extends JPanel {
     private ImageIcon icon = null;
 	private String username = null;
 
-	public static void main(String[] args) {
-		//UserGUI lgui = new UserGUI();
-	}
-
 	private void createActionEvents() {
 	    getAddFriend().addActionListener(l -> {
 			controller.addFriend(username);

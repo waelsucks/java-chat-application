@@ -127,8 +127,6 @@ public class ClientController {
                             
                             if (message.getImage() != null) {
                                 
-                                // view.getChatBox().insertIcon(message.getImage());
-                                // view.getChatBox().add(new JLabel(message.getImage()));
                                 StyleConstants.setIcon(m, message.getImage());
                                 document.insertString(document.getLength(), "\n", m);                                
 

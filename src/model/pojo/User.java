@@ -1,11 +1,7 @@
 package model.pojo;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 /**

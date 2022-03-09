@@ -1,17 +1,11 @@
 package view;
 
 import javax.swing.*;
-import javax.swing.event.MouseInputAdapter;
-import javax.swing.event.MouseInputListener;
-
-import org.w3c.dom.events.MouseEvent;
-
 import controller.ClientController;
 import model.pojo.User;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -103,7 +97,6 @@ public class ClientGUI extends JPanel implements KeyListener {
             } else {
                 icon = null;
             }
-            // controller.sendPic(getMessageBox().getText(), icon);
             controller.sendMessage(getMessageBox().getText(), icon, recievers);
         });
 
@@ -140,7 +133,6 @@ public class ClientGUI extends JPanel implements KeyListener {
         userLabel.setForeground(new Color(50, 205, 50));
 
         userBox = new JList<String>();
-        // userBox.setEditable(true);
         userBox.setBackground(new Color(0, 0, 0));
         userBox.setForeground(new Color(50, 205, 50));
         userBox.setFont(new Font("Monospaced", Font.BOLD, 13));
@@ -160,7 +152,6 @@ public class ClientGUI extends JPanel implements KeyListener {
         contactsLabel.setForeground(new Color(50, 205, 50));
 
         contactsBox = new JList<String>();
-        // userBox.setEditable(true);
         contactsBox.setBackground(new Color(0, 0, 0));
         contactsBox.setForeground(new Color(50, 205, 50));
         contactsBox.setFont(new Font("Monospaced", Font.BOLD, 13));
@@ -189,8 +180,6 @@ public class ClientGUI extends JPanel implements KeyListener {
 
         chatBox = new JTextPane();
         chatBox.setEditable(false);
-        // chatBox.setLineWrap(true);
-        // chatBox.setWrapStyleWord(true);
         chatPane = new JScrollPane(chatBox);
         chatPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         chatPane.setPreferredSize(new Dimension(500, 430));
@@ -313,16 +302,6 @@ public class ClientGUI extends JPanel implements KeyListener {
 
     public void setContactBoxValue(ArrayList<String> friendsParam) {
 
-        // this.friends = friends;
-
-        // String[] toView = new String[friends.size()];
-
-        // for (int i = 0; i < toView.length; i++) {
-
-        // toView[i] = friends.get(i).getName();
-
-        // }
-
         friends = friendsParam;
         String[] list = new String[friendsParam.size()];
 
@@ -337,7 +316,6 @@ public class ClientGUI extends JPanel implements KeyListener {
     @Override
     public void keyTyped(KeyEvent e) {
         // TODO Auto-generated method stub
-
     }
 
     @Override
@@ -374,7 +352,6 @@ public class ClientGUI extends JPanel implements KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
         // TODO Auto-generated method stub
-
     }
 
     public ImageIcon chooseImage() {
