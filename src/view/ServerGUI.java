@@ -56,11 +56,11 @@ public class ServerGUI extends JPanel {
 
                     StringBuilder string = new StringBuilder();
 
+                    Message message = (Message) tp.getEvent();
+
                     if (tp.getType() == PackageType.MESSAGE) {
 
-                        Message message = (Message) tp.getEvent();
-
-                        string.append(String.format("[%s]\n", new Date()));
+                        string.append(String.format("[%s]\n", tp.getDate()));
                         string.append(tp.getUser().getName() + " has sent a message to:\n");
 
                         for (String id : message.getRecieverID()) {
@@ -70,26 +70,27 @@ public class ServerGUI extends JPanel {
 
                     if (tp.getType() == PackageType.SIGN_UP) {
 
-                        string.append(String.format("[%s]\n", new Date()));
+                        string.append(String.format("[%s]\n", tp.getDate()));
                         string.append(tp.getUser().getName() + " registered!\n");
 
                     }
 
                     if (tp.getType() == PackageType.CLIENT_CONNECT) {
 
-                        string.append(String.format("[%s]\n", new Date()));
+                        string.append(String.format("[%s]\n", tp.getDate()));
                         string.append(tp.getUser().getName() + " connected!\n");
 
                     }
 
                     if (tp.getType() == PackageType.CLIENT_DISCONNECT) {
 
-                        string.append(String.format("[%s]\n", new Date()));
+                        string.append(String.format("[%s]\n", tp.getDate()));
                         string.append(tp.getUser().getName() + " disconnected!\n");
 
                     }
+                    
+                    getTrafficBox().append(string.toString() + "\n____________<3_____________\n");
 
-                    getTrafficBox().append(string.toString());
                 }
 
             } catch (Exception e) {
@@ -136,13 +137,13 @@ public class ServerGUI extends JPanel {
         specificTrafficLabel.setFont(new Font("Monospaced", Font.BOLD, 13));
         specificTrafficLabel.setForeground(new Color(50, 205, 50));
 
-        trafficStart = new JTextField("Tue, Mar 08 2022 22:26:03");
+        trafficStart = new JTextField("Wed, Mar 09 2022 09:00:00");
         trafficStart.setPreferredSize(new Dimension(210, 30));
         trafficStart.setBackground(new Color(0, 0, 0));
         trafficStart.setForeground(new Color(50, 205, 50));
         trafficStart.setFont(new Font("Monospaced", Font.BOLD, 12));
 
-        trafficStop = new JTextField("Tue, Mar 08 2022 22:26:03");
+        trafficStop = new JTextField("Wed, Mar 09 2022 09:00:00");
         trafficStop.setPreferredSize(new Dimension(210, 30));
         trafficStop.setBackground(new Color(0, 0, 0));
         trafficStop.setForeground(new Color(50, 205, 50));
