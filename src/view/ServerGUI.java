@@ -122,8 +122,6 @@ public class ServerGUI extends JPanel {
 
         trafficBox = new JTextArea();
         trafficBox.setEditable(false);
-        trafficBox.setLineWrap(true);
-        trafficBox.setWrapStyleWord(true);
         trafficBox.setBackground(new Color(0, 0, 0));
         trafficBox.setForeground(new Color(50, 205, 50));
         trafficBox.setFont(new Font("Monospaced", Font.BOLD, 12));

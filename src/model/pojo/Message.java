@@ -6,6 +6,10 @@ import java.util.Date;
 
 import javax.swing.ImageIcon;
 
+/**
+ * Class encapsulates data. 
+ * Used for sending messages and pictures.
+ */
 public class Message implements PackageInterface, Serializable {
 
     private String message;

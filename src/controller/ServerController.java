@@ -26,6 +26,10 @@ import model.pojo.User;
 import model.pojo.UserGroup;
 import view.ServerGUI;
 
+/**
+ * Class handles communication between server and ClientHandler.
+ * Class handles storage of traffic and events.
+ */
 public class ServerController {
 
     private ServerSocket socket;
@@ -44,7 +48,7 @@ public class ServerController {
         pcs = new PropertyChangeSupport(this);
 
         view = new ServerGUI(this);
-        events = new ArrayList<TrafficPackage>(); // This will later be replaced by a file containing events (?)
+        //events = new ArrayList<TrafficPackage>(); 
         messageQueue = new HashMap<String, ArrayList<Message>>();
 
         users = readUsers();
@@ -71,6 +75,9 @@ public class ServerController {
         pcs.addPropertyChangeListener(listener);
     }
 
+    /**
+     * Reads the events from the file and saves them in an ArrayList for easier access.
+     */
     private ArrayList<TrafficPackage> readEvents() {
 
         events = null;
@@ -88,6 +95,9 @@ public class ServerController {
         return events;
     }
 
+    /**
+     * Reads the users from the file and saves them in a HashMap for easier access.
+     */
     private HashMap<String, User> readUsers() {
 
         users = null;
@@ -105,6 +115,12 @@ public class ServerController {
         return users;
     }
 
+    /**
+     * Creates and adds a new user to the HashMap.
+     * @param username
+     * @param name
+     * @param image
+     */
     public void createUser(String username, String name, ImageIcon image) {
 
         synchronized (users) {
@@ -116,6 +132,11 @@ public class ServerController {
 
     }
 
+    /**
+     * Getter.
+     * @param username
+     * @return
+     */
     public User getUser(String username) {
 
         User user = null;
@@ -125,10 +146,10 @@ public class ServerController {
         return user;
     }
 
+    /**
+     * Writes the current users hashmap to the Users.chat file
+     */
     public void updateUsers() {
-
-        // Writes the current users hashmap to the Users.chat file
-
         try (ObjectOutputStream ous = new ObjectOutputStream(
                 new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
 
@@ -144,10 +165,10 @@ public class ServerController {
 
     }
 
+    /**
+     * Writes the current users hashmap to the Users.chat file
+     */
     public void updateEvents() {
-
-        // Writes the current users hashmap to the Users.chat file
-
         try (ObjectOutputStream ous = new ObjectOutputStream(
                 new BufferedOutputStream(new FileOutputStream("files/Events.chat")))) {
 
@@ -163,6 +184,11 @@ public class ServerController {
 
     }
 
+    /**
+     * Adds the event to the file, checks what type of event it is, 
+     * and prints it in the Traffic GUI accordingly.
+     * @param tp
+     */
     public void logEvent(TrafficPackage tp) {
 
         events.add(tp);
@@ -268,6 +294,10 @@ public class ServerController {
 
     }
 
+    /**
+     * 
+     * @param tp
+     */
     public void broadcast(TrafficPackage tp) {
 
         pcs.firePropertyChange("message", null, tp);
@@ -275,13 +305,14 @@ public class ServerController {
 
     }
 
+
     public void sendMessage(TrafficPackage tp) {
 
         Message message = (Message) tp.getEvent();
 
         if (message.getRecieverID().isEmpty()) {
 
-            // Add all online users as recievers incase recievers is empty. ( public message
+            // Add all online users as recievers in case recievers is empty. ( public message
             // )
 
             for (PropertyChangeListener pcl : pcs.getPropertyChangeListeners()) {
@@ -334,6 +365,12 @@ public class ServerController {
         this.messageQueue = messageQueue;
     }
 
+    /**
+     * Gets events from the file between an interval.
+     * @param from
+     * @param to
+     * @return
+     */
     public ArrayList<TrafficPackage> getEventsBetween(Date from, Date to) {
 
         ArrayList<TrafficPackage> sorted = new ArrayList<TrafficPackage>();

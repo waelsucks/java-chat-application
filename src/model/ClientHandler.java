@@ -7,6 +7,9 @@ import java.util.*;
 import controller.*;
 import model.pojo.*;
 
+/**
+ * Initilazed by the server, this class handles the streams for a client.
+ */
 public class ClientHandler extends Thread implements PropertyChangeListener {
 
     private Socket socket;
@@ -52,7 +55,6 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
             controller.userStatus(username, false);
             controller.getPcs().removePropertyChangeListener(this);
 
-            // e.printStackTrace();
         }
 
     }
@@ -146,8 +148,6 @@ public class ClientHandler extends Thread implements PropertyChangeListener {
             case GET_USER:
 
                 User toSend = controller.getUser(tp.getEvent().getMessage());
-                // User toSend = new User("Tessa Testar", UserGroup.ADMIN, "beep", null);
-                // toSend.setStatus(true);
 
                 outputStream.writeObject(new TrafficPackage(PackageType.GET_USER, null, toSend, null));
 

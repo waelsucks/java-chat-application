@@ -22,6 +22,9 @@ import model.pojo.UserList;
 import view.ClientGUI;
 import view.UserGUI;
 
+/**
+ * Controllern för varje klient.
+ */
 public class ClientController {
 
     private ObjectInputStream inputStream;
@@ -47,6 +50,9 @@ public class ClientController {
 
     }
 
+    /**
+     * Initializes the packet-transfers and handles incoming traffic.
+     */
     private class Listener extends Thread {
 
         public Listener() {
@@ -163,6 +169,9 @@ public class ClientController {
 
     }
 
+    /**
+     * Connects to the streams and checks the online users.
+     */
     public void connect() {
 
         user = null;
@@ -184,6 +193,10 @@ public class ClientController {
 
     }
 
+    /**
+     * Shows the profile for selected user.
+     * @param toShow
+     */
     public void openProfile(User toShow) {
 
         UserGUI profile = new UserGUI(this);
@@ -203,7 +216,6 @@ public class ClientController {
     /**
      * Generates a traffic package with the given event. Event must implement
      * PackageInterface
-     * 
      * @return A traffic package generated from the event.
      */
 
@@ -214,6 +226,13 @@ public class ClientController {
         return packageToSend;
 
     }
+
+    /**
+     * Sends a message with or without an image to the selected users.
+     * @param text
+     * @param icon
+     * @param recievers
+     */
 
     public void sendMessage(String text, ImageIcon icon , ArrayList<String> recievers) {
 
@@ -250,35 +269,36 @@ public class ClientController {
 
     }
 
+    /**
+     * Shuts the client if the button "Disconnect" is pressed (ClientGUI)
+     */
     public void disconnect() {
         System.exit(0);
     }
 
-    public void getProfile(String userID) {
-
-        try {
-            outputStream.writeObject(new TrafficPackage(PackageType.GET_USER, null, new Message(userID, null), user));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public void sendPic(String text, ImageIcon icon) {
-
-        try {
-            outputStream.writeObject(new TrafficPackage(PackageType.MESSAGE, new Date(), new Message(text, icon), user));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
+    /**
+     * Creates a new event sent to the stream.
+     * @param text
+     */
     public void addFriend(String text) {
 
         try {
             outputStream.writeObject(new TrafficPackage(PackageType.ADD_CONTACT, null, new Message(text, null), user));
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Creates a new event sent to the stream.
+     * @param userID
+     */
+    public void getProfile(String userID) {
+
+        try {
+            outputStream.writeObject(new TrafficPackage(PackageType.GET_USER, null, new Message(userID, null), user));
+        } catch (IOException e) {
             e.printStackTrace();
         }
 

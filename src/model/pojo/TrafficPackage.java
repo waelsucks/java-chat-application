@@ -3,6 +3,10 @@ package model.pojo;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * Class encapsulates data. 
+ * Class is all form of traffic that takes place in this program.
+ */
 public class TrafficPackage implements Serializable {
 
     private PackageType type;
