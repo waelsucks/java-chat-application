@@ -5,8 +5,10 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
@@ -15,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.swing.ImageIcon;
 
@@ -48,7 +52,7 @@ public class ServerController {
         pcs = new PropertyChangeSupport(this);
 
         view = new ServerGUI(this);
-        //events = new ArrayList<TrafficPackage>(); 
+        // events = new ArrayList<TrafficPackage>();
         messageQueue = new HashMap<String, ArrayList<Message>>();
 
         users = readUsers();
@@ -76,14 +80,25 @@ public class ServerController {
     }
 
     /**
-     * Reads the events from the file and saves them in an ArrayList for easier access.
+     * Reads the events from the file and saves them in an ArrayList for easier
+     * access.
      */
     private ArrayList<TrafficPackage> readEvents() {
 
         events = null;
 
+        File file = new File("files/Events.chat");
+
+        try {
+            file.getParentFile().mkdirs();
+            file.createNewFile();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
         try (ObjectInputStream ois = new ObjectInputStream(
-                new BufferedInputStream(new FileInputStream("files/Events.chat")))) {
+                new BufferedInputStream(
+                        new GZIPInputStream(new FileInputStream("files/Events.chat"))))) {
 
             events = (ArrayList<TrafficPackage>) ois.readObject();
 
@@ -102,8 +117,17 @@ public class ServerController {
 
         users = null;
 
+        File file = new File("files/Users.chat");
+        try {
+            file.getParentFile().mkdirs();
+            file.createNewFile();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
         try (ObjectInputStream ois = new ObjectInputStream(
-                new BufferedInputStream(new FileInputStream("files/Users.chat")))) {
+                new BufferedInputStream(
+                        new GZIPInputStream(new FileInputStream("files/Users.chat"))))) {
 
             users = (HashMap<String, User>) ois.readObject();
 
@@ -117,6 +141,7 @@ public class ServerController {
 
     /**
      * Creates and adds a new user to the HashMap.
+     * 
      * @param username
      * @param name
      * @param image
@@ -134,6 +159,7 @@ public class ServerController {
 
     /**
      * Getter.
+     * 
      * @param username
      * @return
      */
@@ -151,7 +177,8 @@ public class ServerController {
      */
     public void updateUsers() {
         try (ObjectOutputStream ous = new ObjectOutputStream(
-                new BufferedOutputStream(new FileOutputStream("files/Users.chat")))) {
+                new BufferedOutputStream(
+                        new GZIPOutputStream(new FileOutputStream("files/Users.chat"))))) {
 
             ous.writeObject(users);
 
@@ -170,7 +197,8 @@ public class ServerController {
      */
     public void updateEvents() {
         try (ObjectOutputStream ous = new ObjectOutputStream(
-                new BufferedOutputStream(new FileOutputStream("files/Events.chat")))) {
+                new BufferedOutputStream(
+                        new GZIPOutputStream(new FileOutputStream("files/Events.chat"))))) {
 
             ous.writeObject(events);
 
@@ -185,8 +213,9 @@ public class ServerController {
     }
 
     /**
-     * Adds the event to the file, checks what type of event it is, 
+     * Adds the event to the file, checks what type of event it is,
      * and prints it in the Traffic GUI accordingly.
+     * 
      * @param tp
      */
     public void logEvent(TrafficPackage tp) {
@@ -305,14 +334,14 @@ public class ServerController {
 
     }
 
-
     public void sendMessage(TrafficPackage tp) {
 
         Message message = (Message) tp.getEvent();
 
         if (message.getRecieverID().isEmpty()) {
 
-            // Add all online users as recievers in case recievers is empty. ( public message
+            // Add all online users as recievers in case recievers is empty. ( public
+            // message
             // )
 
             for (PropertyChangeListener pcl : pcs.getPropertyChangeListeners()) {
@@ -367,6 +396,7 @@ public class ServerController {
 
     /**
      * Gets events from the file between an interval.
+     * 
      * @param from
      * @param to
      * @return

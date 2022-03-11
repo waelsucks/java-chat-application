@@ -1,0 +1,1 @@
+java -jar java-chat-application.jar server
