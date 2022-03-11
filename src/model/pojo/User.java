@@ -2,8 +2,6 @@ package model.pojo;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Random;
-
 import javax.swing.ImageIcon;
 
 /**
@@ -17,14 +15,67 @@ public class User implements Serializable, PackageInterface {
     private String userID;
     private String name;
     private UserGroup group;
-    private ImageIcon icon;
+    private ImageIcon iconFile;
+    private boolean status;
+    private ArrayList<String> friends;
 
     public User(String name, UserGroup group, String userID, ImageIcon icon) {
 
         this.name = name;
         this.group = group;
-        this.icon = icon;
         this.userID = userID;
+        this.status = false;
+        this.friends = new ArrayList<String>();
+
+        if (icon == null) {
+            this.iconFile = new ImageIcon("images/new-image.png");
+        } else {
+            this.iconFile = icon;
+        }
+    }
+
+    public void addFriend(String username) {
+        friends.add(username);
+    }
+
+    public void removeFriend(String username) {
+        for (String string : friends) {
+            if (string.equals(username)) {
+                friends.remove(string);
+            }
+        }
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
+
+    public ImageIcon getIconFile() {
+        return this.iconFile;
+    }
+
+    public void setIconFile(ImageIcon icon) {
+        this.iconFile = icon;
+    }
+
+    public boolean isStatus() {
+        return this.status;
+    }
+
+    public boolean getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public ArrayList<String> getFriends() {
+        return this.friends;
+    }
+
+    public void setFriends(ArrayList<String> friends) {
+        this.friends = friends;
     }
 
     public String getUserID() {
@@ -45,14 +96,6 @@ public class User implements Serializable, PackageInterface {
 
     public void setGroup(UserGroup group) {
         this.group = group;
-    }
-
-    public void setImage(ImageIcon icon){
-        this.icon = icon;
-    }
-
-    public ImageIcon getImage(){
-        return this.icon;
     }
 
     @Override
